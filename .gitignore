@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads (keep directory structure)
+backend/uploads/books/*
+backend/uploads/covers/*
+backend/uploads/temp/*
+!backend/uploads/books/.gitkeep
+!backend/uploads/covers/.gitkeep
+!backend/uploads/temp/.gitkeep
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Test coverage
+coverage/
+
+# TypeScript cache
+*.tsbuildinfo
