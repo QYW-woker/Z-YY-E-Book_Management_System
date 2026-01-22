@@ -17,24 +17,66 @@ cd /d "%PROJECT_DIR%"
 :: 先停止已运行的服务
 call "%PROJECT_DIR%stop.bat" >nul 2>nul
 
-:: 检查 Node.js
+:: 检查 Node.js - 尝试多种方式
 echo [INFO] 检查 Node.js...
-where node >nul 2>nul
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] 未找到 Node.js，请先安装 Node.js
-    echo        下载地址: https://nodejs.org/
-    pause
-    exit /b 1
-)
-for /f "tokens=*" %%i in ('node -v') do echo [INFO] Node.js 版本: %%i
+set "NODE_CMD=node"
 
-:: 检查 npm
-where npm >nul 2>nul
-if %ERRORLEVEL% neq 0 (
-    echo [ERROR] 未找到 npm
-    pause
-    exit /b 1
+:: 方式1: 直接尝试运行 node
+node --version >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    for /f "tokens=*" %%i in ('node -v') do echo [INFO] Node.js 版本: %%i
+    goto :node_found
 )
+
+:: 方式2: 检查常见安装路径
+if exist "%ProgramFiles%\nodejs\node.exe" (
+    set "NODE_CMD=%ProgramFiles%\nodejs\node.exe"
+    set "PATH=%ProgramFiles%\nodejs;%PATH%"
+    echo [INFO] 找到 Node.js: %ProgramFiles%\nodejs
+    goto :node_found
+)
+
+if exist "%ProgramFiles(x86)%\nodejs\node.exe" (
+    set "NODE_CMD=%ProgramFiles(x86)%\nodejs\node.exe"
+    set "PATH=%ProgramFiles(x86)%\nodejs;%PATH%"
+    echo [INFO] 找到 Node.js: %ProgramFiles(x86)%\nodejs
+    goto :node_found
+)
+
+if exist "%APPDATA%\npm\node.exe" (
+    set "NODE_CMD=%APPDATA%\npm\node.exe"
+    set "PATH=%APPDATA%\npm;%PATH%"
+    echo [INFO] 找到 Node.js: %APPDATA%\npm
+    goto :node_found
+)
+
+if exist "%LOCALAPPDATA%\Programs\nodejs\node.exe" (
+    set "NODE_CMD=%LOCALAPPDATA%\Programs\nodejs\node.exe"
+    set "PATH=%LOCALAPPDATA%\Programs\nodejs;%PATH%"
+    echo [INFO] 找到 Node.js: %LOCALAPPDATA%\Programs\nodejs
+    goto :node_found
+)
+
+:: 方式3: 使用 where 命令
+for /f "tokens=*" %%i in ('where node 2^>nul') do (
+    set "NODE_CMD=%%i"
+    echo [INFO] 找到 Node.js: %%i
+    goto :node_found
+)
+
+:: 未找到 Node.js
+echo [ERROR] 未找到 Node.js，请确保已安装并添加到 PATH
+echo.
+echo 解决方法:
+echo 1. 打开新的命令提示符窗口再试
+echo 2. 或手动添加 Node.js 到 PATH 环境变量
+echo 3. 或重新安装 Node.js 并勾选"Add to PATH"选项
+echo.
+pause
+exit /b 1
+
+:node_found
+for /f "tokens=*" %%i in ('node -v 2^>nul') do echo [INFO] Node.js 版本: %%i
 
 :: 安装根目录依赖
 if not exist "%PROJECT_DIR%node_modules" (
