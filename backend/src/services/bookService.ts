@@ -281,15 +281,13 @@ export const bookService = {
 
   // 记录浏览日志
   logView(bookId: string, ip: string, userAgent: string): void {
-    const id = uuidv4();
-    db.prepare('INSERT INTO view_logs (id, book_id, ip, user_agent) VALUES (?, ?, ?, ?)').run(id, bookId, ip, userAgent);
+    db.prepare('INSERT INTO view_logs (book_id, ip, user_agent) VALUES (?, ?, ?)').run(bookId, ip, userAgent);
     this.incrementViewCount(bookId);
   },
 
   // 记录下载日志
   logDownload(bookId: string, ip: string, userAgent: string): void {
-    const id = uuidv4();
-    db.prepare('INSERT INTO download_logs (id, book_id, ip, user_agent) VALUES (?, ?, ?, ?)').run(id, bookId, ip, userAgent);
+    db.prepare('INSERT INTO download_logs (book_id, ip, user_agent) VALUES (?, ?, ?)').run(bookId, ip, userAgent);
     this.incrementDownloadCount(bookId);
   },
 };
