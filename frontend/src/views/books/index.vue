@@ -196,19 +196,21 @@
           </template>
         </el-table-column>
 
-        <el-table-column v-if="isColumnVisible('actions')" label="操作" width="180" fixed="right">
+        <el-table-column v-if="isColumnVisible('actions')" label="操作" width="150" fixed="right">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="$router.push(`/books/${row.book_id}/edit`)">
-              编辑
-            </el-button>
-            <el-button text type="primary" size="small" @click="handleDownload(row)">
-              下载
-            </el-button>
-            <el-popconfirm title="确定要删除这本书吗？" @confirm="handleDelete(row.book_id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <div class="action-buttons">
+              <el-button text type="primary" size="small" @click="$router.push(`/books/${row.book_id}/edit`)">
+                编辑
+              </el-button>
+              <el-button text type="primary" size="small" @click="handleDownload(row)">
+                下载
+              </el-button>
+              <el-popconfirm title="确定要删除这本书吗？" @confirm="handleDelete(row.book_id)">
+                <template #reference>
+                  <el-button text type="danger" size="small">删除</el-button>
+                </template>
+              </el-popconfirm>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -330,7 +332,7 @@ const columnConfig = ref<ColumnConfig[]>([
   { key: 'view_count', label: '浏览量', visible: true, width: 100, sortable: true },
   { key: 'download_count', label: '下载量', visible: true, width: 100, sortable: true },
   { key: 'created_at', label: '创建时间', visible: true, width: 160, sortable: true },
-  { key: 'actions', label: '操作', visible: true, width: 180 },
+  { key: 'actions', label: '操作', visible: true, width: 150 },
 ])
 
 const visibleColumnKeys = computed({
@@ -569,6 +571,18 @@ watch([filterStatus, filterCategory, filterTags], () => {
 
     &:last-child {
       border-bottom: none;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+
+    .el-button {
+      padding: 4px 8px;
+      margin: 0;
     }
   }
 }
