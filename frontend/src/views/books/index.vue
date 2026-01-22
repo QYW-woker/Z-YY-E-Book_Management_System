@@ -58,6 +58,19 @@
         </div>
 
         <div class="toolbar-right">
+          <el-button
+            :disabled="selectedIds.length === 0"
+            @click="handleBatchDownload"
+          >
+            <el-icon><Download /></el-icon>批量下载{{ selectedIds.length > 0 ? ` (${selectedIds.length})` : '' }}
+          </el-button>
+          <el-button
+            type="danger"
+            :disabled="selectedIds.length === 0"
+            @click="handleBatchDelete"
+          >
+            <el-icon><Delete /></el-icon>批量删除{{ selectedIds.length > 0 ? ` (${selectedIds.length})` : '' }}
+          </el-button>
           <el-button v-if="selectedIds.length > 0" @click="handleBatchEdit">
             <el-icon><Edit /></el-icon>批量编辑 ({{ selectedIds.length }})
           </el-button>
@@ -69,9 +82,6 @@
               <el-dropdown-menu>
                 <el-dropdown-item command="published">批量上架</el-dropdown-item>
                 <el-dropdown-item command="archived">批量下架</el-dropdown-item>
-                <el-dropdown-item command="delete" divided>
-                  <span class="text-danger">批量删除</span>
-                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -539,6 +549,47 @@ const handleDelete = async (id: string) => {
   try {
     await booksApi.delete(id)
     ElMessage.success('删除成功')
+    fetchBooks()
+  } catch {}
+}
+
+// 批量下载
+const handleBatchDownload = async () => {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning('请先选择要下载的书籍')
+    return
+  }
+  ElMessage.info(`开始下载 ${selectedIds.value.length} 本书籍...`)
+  for (const id of selectedIds.value) {
+    try {
+      await booksApi.download(id)
+    } catch (err) {
+      console.error(`下载失败: ${id}`, err)
+    }
+  }
+  ElMessage.success('批量下载完成')
+}
+
+// 批量删除
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning('请先选择要删除的书籍')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedIds.value.length} 本书吗？此操作不可恢复！`,
+      '批量删除确认',
+      {
+        type: 'warning',
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'el-button--danger',
+      }
+    )
+    await booksApi.batchDelete(selectedIds.value)
+    ElMessage.success('批量删除成功')
+    selectedIds.value = []
     fetchBooks()
   } catch {}
 }
