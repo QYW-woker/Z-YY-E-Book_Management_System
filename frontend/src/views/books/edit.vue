@@ -147,7 +147,7 @@
                 :http-request="uploadCover"
                 accept="image/jpeg,image/png"
               >
-                <img v-if="form.cover_path" :src="form.cover_path" class="cover-preview" />
+                <img v-if="form.cover_path" :src="getCoverUrl(form.cover_path)" class="cover-preview" />
                 <div v-else class="cover-placeholder">
                   <el-icon :size="40"><Plus /></el-icon>
                   <span>上传封面</span>
@@ -230,6 +230,17 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 const saving = ref(false)
 const extractingCover = ref(false)
+
+// 获取封面完整URL
+const getCoverUrl = (coverPath: string | undefined | null): string => {
+  if (!coverPath) return ''
+  // 如果是base64数据或已经是完整URL，直接返回
+  if (coverPath.startsWith('data:') || coverPath.startsWith('http') || coverPath.startsWith('/')) {
+    return coverPath
+  }
+  // 添加/uploads/前缀
+  return `/uploads/${coverPath}`
+}
 
 const form = reactive<Partial<BookMetadata>>({
   title: '',

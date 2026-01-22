@@ -100,7 +100,7 @@
         <el-table-column v-if="isColumnVisible('cover')" label="封面" width="80" fixed>
           <template #default="{ row }">
             <img
-              :src="row.cover_path || defaultCover"
+              :src="getCoverUrl(row.cover_path)"
               class="book-cover"
               @error="(e: Event) => (e.target as HTMLImageElement).src = defaultCover"
             />
@@ -304,6 +304,17 @@ import { tagsApi } from '@/api/tags'
 import { formatDate, formatFileSize, formatNumber, getStatusText, getStatusType, languageOptions, debounce } from '@/utils'
 
 const defaultCover = '/images/default-cover.png'
+
+// 获取封面完整URL
+const getCoverUrl = (coverPath: string | undefined | null): string => {
+  if (!coverPath) return defaultCover
+  // 如果已经是完整URL或以/开头，直接返回
+  if (coverPath.startsWith('http') || coverPath.startsWith('/')) {
+    return coverPath
+  }
+  // 添加/uploads/前缀
+  return `/uploads/${coverPath}`
+}
 
 // 数据状态
 const books = ref<BookMetadata[]>([])
