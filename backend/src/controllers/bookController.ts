@@ -179,8 +179,10 @@ export const bookController = {
 
     files.forEach((file) => {
       try {
-        const ext = path.extname(file.originalname).toLowerCase().slice(1);
-        const title = path.basename(file.originalname, path.extname(file.originalname));
+        // 修复中文文件名编码问题 (multer 使用 latin1，需要转换为 UTF-8)
+        const originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+        const ext = path.extname(originalname).toLowerCase().slice(1);
+        const title = path.basename(originalname, path.extname(originalname));
 
         const book = bookService.create({
           title,
@@ -191,13 +193,18 @@ export const bookController = {
         });
 
         results.push({
-          filename: file.originalname,
+          filename: originalname,
           success: true,
           book_id: book.book_id,
         });
       } catch (err: any) {
+        // 尝试修复文件名编码用于错误报告
+        let filename = file.originalname;
+        try {
+          filename = Buffer.from(file.originalname, 'latin1').toString('utf8');
+        } catch {}
         results.push({
-          filename: file.originalname,
+          filename,
           success: false,
           error: err.message || '导入失败',
         });
