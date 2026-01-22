@@ -176,6 +176,17 @@ export const bookController = {
       return;
     }
 
+    // 解析前端传递的封面数据
+    let covers: Record<string, string> = {};
+    if (req.body.covers) {
+      try {
+        covers = JSON.parse(req.body.covers);
+        console.log('[import] Received covers for:', Object.keys(covers));
+      } catch (e) {
+        console.warn('[import] Failed to parse covers data:', e);
+      }
+    }
+
     const results: { filename: string; success: boolean; book_id?: string; error?: string }[] = [];
 
     for (const file of files) {
@@ -194,22 +205,51 @@ export const bookController = {
           status: 'draft',
         });
 
-        // 如果是 PDF 文件，自动提取首页作为封面
-        if (ext === 'pdf') {
-          console.log('[import] Detected PDF file, extracting cover...');
+        // 检查前端是否已提取封面
+        let coverPath: string | null = null;
+        if (covers[originalname]) {
+          // 使用前端已提取的封面（base64）
           try {
-            const fullFilePath = path.join(config.upload.dir, filePath);
-            console.log('[import] Full file path:', fullFilePath);
-            const coverPath = await extractPdfCover(fullFilePath);
-            console.log('[import] Cover extraction result:', coverPath);
-            if (coverPath) {
-              bookService.update(book.book_id, { cover_path: coverPath });
-              console.log('[import] Book cover updated successfully');
+            const base64Data = covers[originalname];
+            const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (matches) {
+              const imageExt = matches[1];
+              const imageData = Buffer.from(matches[2], 'base64');
+
+              // 确保封面目录存在
+              const coverDir = path.join(config.upload.dir, config.upload.coversDir);
+              if (!fs.existsSync(coverDir)) {
+                fs.mkdirSync(coverDir, { recursive: true });
+              }
+
+              // 保存封面文件
+              const { v4: uuidv4 } = await import('uuid');
+              const coverFilename = `${uuidv4()}.${imageExt}`;
+              const coverFullPath = path.join(coverDir, coverFilename);
+              fs.writeFileSync(coverFullPath, imageData);
+              coverPath = `${config.upload.coversDir}/${coverFilename}`;
+              console.log('[import] Saved preview cover:', coverPath);
             }
           } catch (coverErr) {
-            // 封面提取失败不影响导入结果，仅记录日志
+            console.warn('[import] Failed to save preview cover:', coverErr);
+          }
+        }
+
+        // 如果前端没有提取封面且是PDF文件，尝试后端提取
+        if (!coverPath && ext === 'pdf') {
+          console.log('[import] No preview cover, extracting from PDF...');
+          try {
+            const fullFilePath = path.join(config.upload.dir, filePath);
+            coverPath = await extractPdfCover(fullFilePath);
+          } catch (coverErr) {
             console.warn(`[import] Failed to extract cover for ${originalname}:`, coverErr);
           }
+        }
+
+        // 更新书籍封面
+        if (coverPath) {
+          bookService.update(book.book_id, { cover_path: coverPath });
+          console.log('[import] Book cover updated:', coverPath);
         }
 
         results.push({

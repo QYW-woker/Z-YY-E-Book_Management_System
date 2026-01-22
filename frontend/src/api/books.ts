@@ -53,12 +53,19 @@ export const booksApi = {
 
   /**
    * 导入电子书
+   * @param files 文件列表
+   * @param covers 封面数据（key为文件名，value为base64封面）
+   * @param onProgress 进度回调
    */
-  import(files: File[], onProgress?: (progress: number) => void): Promise<ImportResult> {
+  import(files: File[], covers?: Record<string, string>, onProgress?: (progress: number) => void): Promise<ImportResult> {
     const formData = new FormData()
     files.forEach((file) => {
       formData.append('files', file)
     })
+    // 如果有预览封面数据，一起发送
+    if (covers && Object.keys(covers).length > 0) {
+      formData.append('covers', JSON.stringify(covers))
+    }
     return request.upload('/admin/books/import', formData, onProgress)
   },
 

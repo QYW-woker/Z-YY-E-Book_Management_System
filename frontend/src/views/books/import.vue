@@ -323,14 +323,22 @@ const startUpload = async () => {
     // 获取所有待上传的文件
     const files = uploadFiles.value.map((f) => f.file)
 
+    // 收集已提取的封面数据
+    const covers: Record<string, string> = {}
+    uploadFiles.value.forEach((f) => {
+      if (f.cover) {
+        covers[f.filename] = f.cover
+      }
+    })
+
     // 更新状态为上传中
     uploadFiles.value.forEach((f) => {
       f.status = 'uploading'
       f.progress = 0
     })
 
-    // 调用批量导入API
-    const result = await booksApi.import(files, (progress) => {
+    // 调用批量导入API，传递封面数据
+    const result = await booksApi.import(files, covers, (progress) => {
       // 更新总进度
       uploadFiles.value.forEach((f) => {
         if (f.status === 'uploading') {
