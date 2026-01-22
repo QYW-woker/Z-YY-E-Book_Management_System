@@ -32,7 +32,9 @@ router.post('/admin/books/batch-delete', bookController.batchDelete);
 router.post('/admin/books/batch-update', bookController.batchUpdate);
 router.patch('/admin/books/:id/status', bookController.updateStatus);
 router.post('/admin/books/batch-status', bookController.batchUpdateStatus);
-router.post('/admin/books/import', uploadBooks.array('files', 50), bookController.import);
+router.post('/admin/books/import', uploadBooks.array('files', 50), (req, res, next) => {
+  bookController.import(req, res).catch(next);
+});
 router.post('/admin/books/:id/cover', uploadCover.single('cover'), bookController.uploadCover);
 router.get('/admin/books/:id/download', (req, res) => bookController.download(req as AuthRequest, res));
 router.post('/admin/books/export', bookController.export);
