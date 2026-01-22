@@ -148,7 +148,6 @@
               </div>
               <div class="cover-actions">
                 <el-button
-                  v-if="isEdit && form.file_path"
                   type="primary"
                   :loading="extractingCover"
                   @click="handleExtractCover"
