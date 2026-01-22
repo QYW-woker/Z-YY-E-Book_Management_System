@@ -47,6 +47,11 @@
         </div>
 
         <el-table :data="uploadFiles" max-height="400">
+          <el-table-column label="序号" width="60" align="center">
+            <template #default="{ $index }">
+              {{ $index + 1 }}
+            </template>
+          </el-table-column>
           <el-table-column label="封面" width="80">
             <template #default="{ row }">
               <div class="cover-cell">
