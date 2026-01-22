@@ -146,9 +146,19 @@
                 <p>建议尺寸: 400x600 (比例2:3)</p>
                 <p>格式: JPG/PNG, 最大2MB</p>
               </div>
-              <el-button v-if="form.cover_path" type="danger" text @click="form.cover_path = ''">
-                删除封面
-              </el-button>
+              <div class="cover-actions">
+                <el-button
+                  v-if="isEdit && form.format?.toLowerCase() === 'pdf'"
+                  type="primary"
+                  :loading="extractingCover"
+                  @click="handleExtractCover"
+                >
+                  提取文件封面
+                </el-button>
+                <el-button v-if="form.cover_path" type="danger" text @click="form.cover_path = ''">
+                  删除封面
+                </el-button>
+              </div>
             </div>
           </div>
 
@@ -218,6 +228,7 @@ const isEdit = computed(() => !!bookId.value && bookId.value !== 'new')
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const saving = ref(false)
+const extractingCover = ref(false)
 
 const form = reactive<Partial<BookMetadata>>({
   title: '',
@@ -325,6 +336,22 @@ const uploadCover = async (options: { file: File }) => {
   }
 }
 
+// 从PDF提取封面
+const handleExtractCover = async () => {
+  if (!isEdit.value) return
+
+  extractingCover.value = true
+  try {
+    const result = await booksApi.extractCover(bookId.value)
+    form.cover_path = result.cover_path
+    ElMessage.success('封面提取成功')
+  } catch (err: any) {
+    ElMessage.error(err.message || '封面提取失败')
+  } finally {
+    extractingCover.value = false
+  }
+}
+
 // 保存
 const handleSave = async (continueEdit = false) => {
   const valid = await formRef.value?.validate()
@@ -427,6 +454,13 @@ onMounted(() => {
         font-size: 12px;
         color: #909399;
       }
+    }
+
+    .cover-actions {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
   }
 

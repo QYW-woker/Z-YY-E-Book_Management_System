@@ -36,6 +36,9 @@ router.post('/admin/books/import', uploadBooks.array('files', 50), (req, res, ne
   bookController.import(req, res).catch(next);
 });
 router.post('/admin/books/:id/cover', uploadCover.single('cover'), bookController.uploadCover);
+router.post('/admin/books/:id/extract-cover', (req, res, next) => {
+  bookController.extractCover(req, res).catch(next);
+});
 router.get('/admin/books/:id/download', (req, res) => bookController.download(req as AuthRequest, res));
 router.post('/admin/books/export', bookController.export);
 

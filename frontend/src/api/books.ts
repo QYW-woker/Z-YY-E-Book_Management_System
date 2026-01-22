@@ -72,6 +72,13 @@ export const booksApi = {
   },
 
   /**
+   * 从PDF提取封面
+   */
+  extractCover(bookId: string): Promise<{ cover_path: string }> {
+    return request.post(`/admin/books/${bookId}/extract-cover`)
+  },
+
+  /**
    * 下载电子书
    */
   download(id: string): Promise<void> {

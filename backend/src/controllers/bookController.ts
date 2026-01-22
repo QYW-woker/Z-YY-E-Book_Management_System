@@ -273,6 +273,54 @@ export const bookController = {
     success(res, { cover_path: `/uploads/${coverPath}` });
   },
 
+  // 从PDF提取封面
+  async extractCover(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+
+    const book = bookService.getById(id);
+    if (!book) {
+      error(res, '书籍不存在', -1, 404);
+      return;
+    }
+
+    // 检查是否是 PDF 文件
+    if (book.format?.toLowerCase() !== 'pdf') {
+      error(res, '只有PDF文件支持提取封面');
+      return;
+    }
+
+    // 检查文件是否存在
+    const filePath = path.join(config.upload.dir, book.file_path);
+    if (!fs.existsSync(filePath)) {
+      error(res, '书籍文件不存在');
+      return;
+    }
+
+    try {
+      const coverPath = await extractPdfCover(filePath);
+      if (!coverPath) {
+        error(res, '封面提取失败');
+        return;
+      }
+
+      // 删除旧封面
+      if (book.cover_path) {
+        const oldCoverPath = path.join(config.upload.dir, book.cover_path);
+        if (fs.existsSync(oldCoverPath)) {
+          fs.unlinkSync(oldCoverPath);
+        }
+      }
+
+      // 更新书籍封面路径
+      bookService.update(id, { cover_path: coverPath });
+
+      success(res, { cover_path: `/uploads/${coverPath}` });
+    } catch (err: any) {
+      console.error('Extract cover error:', err);
+      error(res, err.message || '封面提取失败');
+    }
+  },
+
   // 下载书籍
   download(req: AuthRequest, res: Response): void {
     const { id } = req.params;
