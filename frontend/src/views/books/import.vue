@@ -47,6 +47,24 @@
         </div>
 
         <el-table :data="uploadFiles" max-height="400">
+          <el-table-column label="封面" width="80">
+            <template #default="{ row }">
+              <div class="cover-cell">
+                <el-image
+                  v-if="row.cover"
+                  :src="row.cover"
+                  fit="cover"
+                  class="cover-preview"
+                />
+                <div v-else-if="row.coverLoading" class="cover-loading">
+                  <el-icon class="is-loading"><Loading /></el-icon>
+                </div>
+                <div v-else class="cover-empty">
+                  <el-icon><Picture /></el-icon>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column label="文件名" min-width="200" show-overflow-tooltip>
             <template #default="{ row }">
               <div class="file-name">
@@ -161,9 +179,16 @@
 import { ref } from 'vue'
 import type { UploadFile, UploadInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
+import { Loading, Picture } from '@element-plus/icons-vue'
 import type { ImportResult, UploadProgress } from '@/types'
 import { booksApi } from '@/api/books'
 import { formatFileSize, getFileExtension } from '@/utils'
+
+interface UploadFileItem extends UploadProgress {
+  file: File
+  cover?: string
+  coverLoading?: boolean
+}
 
 const acceptTypes = '.pdf,.epub,.mobi,.azw3'
 const allowedFormats = ['pdf', 'epub', 'mobi', 'azw3']
@@ -171,13 +196,29 @@ const maxFileSize = 500 * 1024 * 1024 // 500MB
 
 const uploadRef = ref<UploadInstance>()
 const fileList = ref<UploadFile[]>([])
-const uploadFiles = ref<(UploadProgress & { file: File })[]>([])
+const uploadFiles = ref<UploadFileItem[]>([])
 const uploading = ref(false)
 const importResult = ref<ImportResult | null>(null)
 
 // 获取文件格式
 const getFileFormat = (filename: string): string => {
   return getFileExtension(filename).toUpperCase()
+}
+
+// 提取PDF封面预览
+const extractCoverPreview = async (fileItem: UploadFileItem) => {
+  const ext = getFileExtension(fileItem.filename)
+  if (ext !== 'pdf') return
+
+  fileItem.coverLoading = true
+  try {
+    const result = await booksApi.previewCover(fileItem.file)
+    fileItem.cover = result.cover
+  } catch (err) {
+    console.warn('Failed to extract cover preview:', err)
+  } finally {
+    fileItem.coverLoading = false
+  }
 }
 
 // 处理文件变化
@@ -199,12 +240,18 @@ const handleFileChange = (file: UploadFile) => {
   }
 
   // 添加到上传列表
-  uploadFiles.value.push({
+  const fileItem: UploadFileItem = {
     filename: file.name,
     progress: 0,
     status: 'pending',
     file: file.raw as File,
-  })
+    cover: undefined,
+    coverLoading: false,
+  }
+  uploadFiles.value.push(fileItem)
+
+  // 如果是PDF，自动提取封面预览
+  extractCoverPreview(fileItem)
 }
 
 // 处理文件移除
@@ -313,6 +360,37 @@ const resetImport = () => {
       padding: 12px 16px;
       background: #f5f7fa;
       border-radius: 4px;
+    }
+
+    .cover-cell {
+      width: 50px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .cover-preview {
+        width: 50px;
+        height: 70px;
+        border-radius: 4px;
+        object-fit: cover;
+      }
+
+      .cover-loading,
+      .cover-empty {
+        width: 50px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f7fa;
+        border-radius: 4px;
+        color: #c0c4cc;
+
+        .el-icon {
+          font-size: 20px;
+        }
+      }
     }
 
     .file-name {

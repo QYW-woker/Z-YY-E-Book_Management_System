@@ -273,7 +273,62 @@ export const bookController = {
     success(res, { cover_path: `/uploads/${coverPath}` });
   },
 
-  // 从PDF提取封面
+  // 预览PDF封面（上传临时文件并提取封面返回base64）
+  async previewCover(req: Request, res: Response): Promise<void> {
+    const file = req.file;
+
+    if (!file) {
+      error(res, '请上传PDF文件');
+      return;
+    }
+
+    // 检查是否是PDF
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext !== '.pdf') {
+      // 删除临时文件
+      fs.unlinkSync(file.path);
+      error(res, '只有PDF文件支持提取封面');
+      return;
+    }
+
+    try {
+      // 动态导入 mupdf
+      const mupdf = await import('mupdf');
+
+      // 读取PDF
+      const pdfData = fs.readFileSync(file.path);
+      const doc = mupdf.Document.openDocument(pdfData, 'application/pdf');
+
+      if (doc.countPages() === 0) {
+        fs.unlinkSync(file.path);
+        error(res, 'PDF文件没有页面');
+        return;
+      }
+
+      // 提取第一页
+      const page = doc.loadPage(0);
+      const scale = 0.5; // 预览用较小的缩放
+      const matrix = mupdf.Matrix.scale(scale, scale);
+      const pixmap = page.toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, false, true);
+      const pngData = pixmap.asPNG();
+
+      // 删除临时文件
+      fs.unlinkSync(file.path);
+
+      // 返回base64
+      const base64 = Buffer.from(pngData).toString('base64');
+      success(res, { cover: `data:image/png;base64,${base64}` });
+    } catch (err: any) {
+      // 删除临时文件
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      console.error('Preview cover error:', err);
+      error(res, err.message || '封面预览失败');
+    }
+  },
+
+  // 从PDF提取封面（已存在的书籍）
   async extractCover(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
 

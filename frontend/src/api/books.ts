@@ -72,6 +72,15 @@ export const booksApi = {
   },
 
   /**
+   * 预览PDF封面（上传文件并提取第一页作为base64返回）
+   */
+  previewCover(file: File): Promise<{ cover: string }> {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request.upload('/admin/books/preview-cover', formData)
+  },
+
+  /**
    * 从PDF提取封面
    */
   extractCover(bookId: string): Promise<{ cover_path: string }> {
