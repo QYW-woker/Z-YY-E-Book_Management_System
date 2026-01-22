@@ -275,9 +275,12 @@ export const bookController = {
 
   // 预览PDF封面（上传临时文件并提取封面返回base64）
   async previewCover(req: Request, res: Response): Promise<void> {
+    console.log('previewCover called');
     const file = req.file;
+    console.log('File received:', file ? { originalname: file.originalname, path: file.path, size: file.size } : null);
 
     if (!file) {
+      console.log('No file uploaded');
       error(res, '请上传PDF文件');
       return;
     }
@@ -292,12 +295,17 @@ export const bookController = {
     }
 
     try {
+      console.log('Importing mupdf...');
       // 动态导入 mupdf
       const mupdf = await import('mupdf');
+      console.log('mupdf imported successfully');
 
       // 读取PDF
+      console.log('Reading PDF from:', file.path);
       const pdfData = fs.readFileSync(file.path);
+      console.log('PDF size:', pdfData.length, 'bytes');
       const doc = mupdf.Document.openDocument(pdfData, 'application/pdf');
+      console.log('Document opened, pages:', doc.countPages());
 
       if (doc.countPages() === 0) {
         fs.unlinkSync(file.path);
