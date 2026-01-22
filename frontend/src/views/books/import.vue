@@ -206,36 +206,41 @@ const getFileFormat = (filename: string): string => {
 }
 
 // 提取PDF封面预览
-const extractCoverPreview = async (fileItem: UploadFileItem) => {
-  const ext = getFileExtension(fileItem.filename)
-  console.log('extractCoverPreview called, ext:', ext, 'file:', fileItem.file)
+const extractCoverPreview = async (filename: string, file: File) => {
+  const ext = getFileExtension(filename)
   if (ext !== 'pdf') {
-    console.log('Not a PDF, skipping cover preview')
     return
   }
 
-  fileItem.coverLoading = true
-  console.log('Starting cover preview extraction...')
+  // 找到数组中的索引
+  const index = uploadFiles.value.findIndex(f => f.filename === filename)
+  if (index === -1) return
+
+  // 通过索引更新，确保触发Vue响应式
+  uploadFiles.value[index].coverLoading = true
 
   // 添加超时控制
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('封面提取超时')), 30000)
+    setTimeout(() => reject(new Error('封面提取超时')), 60000)
   })
 
   try {
-    console.log('Calling booksApi.previewCover...')
     const result = await Promise.race([
-      booksApi.previewCover(fileItem.file),
+      booksApi.previewCover(file),
       timeoutPromise
     ])
-    console.log('Cover preview result:', result)
-    fileItem.cover = result.cover
+    // 重新查找索引（防止数组变化）
+    const currentIndex = uploadFiles.value.findIndex(f => f.filename === filename)
+    if (currentIndex !== -1 && result.cover) {
+      uploadFiles.value[currentIndex].cover = result.cover
+      uploadFiles.value[currentIndex].coverLoading = false
+    }
   } catch (err: any) {
     console.error('Failed to extract cover preview:', err)
-    // 提取失败时不显示错误提示，只在控制台记录
-  } finally {
-    console.log('Cover preview extraction finished')
-    fileItem.coverLoading = false
+    const currentIndex = uploadFiles.value.findIndex(f => f.filename === filename)
+    if (currentIndex !== -1) {
+      uploadFiles.value[currentIndex].coverLoading = false
+    }
   }
 }
 
@@ -258,7 +263,6 @@ const handleFileChange = (file: UploadFile) => {
   }
 
   // 添加到上传列表
-  console.log('handleFileChange - file.raw:', file.raw, 'typeof:', typeof file.raw)
   const rawFile = file.raw as File
   if (!rawFile) {
     console.error('file.raw is undefined!')
@@ -273,10 +277,9 @@ const handleFileChange = (file: UploadFile) => {
     coverLoading: false,
   }
   uploadFiles.value.push(fileItem)
-  console.log('File added to uploadFiles:', fileItem.filename, 'file size:', rawFile.size)
 
   // 如果是PDF，自动提取封面预览
-  extractCoverPreview(fileItem)
+  extractCoverPreview(file.name, rawFile)
 }
 
 // 处理文件移除
