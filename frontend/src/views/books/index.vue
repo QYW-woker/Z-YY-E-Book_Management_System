@@ -91,6 +91,12 @@
       >
         <el-table-column type="selection" width="50" fixed />
 
+        <el-table-column label="序号" width="70" fixed>
+          <template #default="{ $index }">
+            {{ (page - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
+
         <el-table-column v-if="isColumnVisible('cover')" label="封面" width="80" fixed>
           <template #default="{ row }">
             <img
