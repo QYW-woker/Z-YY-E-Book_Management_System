@@ -216,13 +216,23 @@ const extractCoverPreview = async (fileItem: UploadFileItem) => {
 
   fileItem.coverLoading = true
   console.log('Starting cover preview extraction...')
+
+  // 添加超时控制
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('封面提取超时')), 30000)
+  })
+
   try {
     console.log('Calling booksApi.previewCover...')
-    const result = await booksApi.previewCover(fileItem.file)
+    const result = await Promise.race([
+      booksApi.previewCover(fileItem.file),
+      timeoutPromise
+    ])
     console.log('Cover preview result:', result)
     fileItem.cover = result.cover
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to extract cover preview:', err)
+    // 提取失败时不显示错误提示，只在控制台记录
   } finally {
     console.log('Cover preview extraction finished')
     fileItem.coverLoading = false
