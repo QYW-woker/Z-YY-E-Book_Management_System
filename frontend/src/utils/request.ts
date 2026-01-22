@@ -30,8 +30,13 @@ instance.interceptors.request.use(
 
 // 响应拦截器
 instance.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
-    const { data } = response
+  (response: AxiosResponse) => {
+    // 如果是 blob 响应，直接返回完整 response
+    if (response.config.responseType === 'blob') {
+      return response
+    }
+
+    const data = response.data as ApiResponse
 
     // 业务错误处理
     if (data.code !== 0) {
@@ -126,19 +131,29 @@ export const request = {
   },
 
   // 文件下载
-  download(url: string, filename?: string): Promise<void> {
-    return instance
-      .get(url, {
-        responseType: 'blob',
-      })
-      .then((response: any) => {
-        const blob = new Blob([response])
-        const link = document.createElement('a')
-        link.href = URL.createObjectURL(blob)
-        link.download = filename || 'download'
-        link.click()
-        URL.revokeObjectURL(link.href)
-      })
+  async download(url: string, filename?: string): Promise<void> {
+    const response = await instance.get(url, {
+      responseType: 'blob',
+    })
+
+    // 从响应头获取文件名
+    const contentDisposition = response.headers?.['content-disposition']
+    let downloadFilename = filename
+    if (!downloadFilename && contentDisposition) {
+      const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^'";]+)['"]?/i)
+      if (match) {
+        downloadFilename = decodeURIComponent(match[1])
+      }
+    }
+
+    const blob = new Blob([response.data])
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = downloadFilename || 'download'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(link.href)
   },
 }
 
