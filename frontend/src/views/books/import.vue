@@ -208,15 +208,23 @@ const getFileFormat = (filename: string): string => {
 // 提取PDF封面预览
 const extractCoverPreview = async (fileItem: UploadFileItem) => {
   const ext = getFileExtension(fileItem.filename)
-  if (ext !== 'pdf') return
+  console.log('extractCoverPreview called, ext:', ext, 'file:', fileItem.file)
+  if (ext !== 'pdf') {
+    console.log('Not a PDF, skipping cover preview')
+    return
+  }
 
   fileItem.coverLoading = true
+  console.log('Starting cover preview extraction...')
   try {
+    console.log('Calling booksApi.previewCover...')
     const result = await booksApi.previewCover(fileItem.file)
+    console.log('Cover preview result:', result)
     fileItem.cover = result.cover
   } catch (err) {
-    console.warn('Failed to extract cover preview:', err)
+    console.error('Failed to extract cover preview:', err)
   } finally {
+    console.log('Cover preview extraction finished')
     fileItem.coverLoading = false
   }
 }
@@ -240,15 +248,22 @@ const handleFileChange = (file: UploadFile) => {
   }
 
   // 添加到上传列表
+  console.log('handleFileChange - file.raw:', file.raw, 'typeof:', typeof file.raw)
+  const rawFile = file.raw as File
+  if (!rawFile) {
+    console.error('file.raw is undefined!')
+    return
+  }
   const fileItem: UploadFileItem = {
     filename: file.name,
     progress: 0,
     status: 'pending',
-    file: file.raw as File,
+    file: rawFile,
     cover: undefined,
     coverLoading: false,
   }
   uploadFiles.value.push(fileItem)
+  console.log('File added to uploadFiles:', fileItem.filename, 'file size:', rawFile.size)
 
   // 如果是PDF，自动提取封面预览
   extractCoverPreview(fileItem)
