@@ -99,7 +99,7 @@
             </el-table-column>
             <el-table-column label="封面" width="60">
               <template #default="{ row }">
-                <img :src="row.cover_path || defaultCover" class="book-cover" />
+                <img :src="getCoverUrl(row.cover_path)" class="book-cover" />
               </template>
             </el-table-column>
             <el-table-column prop="title" label="书名" min-width="150" show-overflow-tooltip />
@@ -128,7 +128,7 @@
             </el-table-column>
             <el-table-column label="封面" width="60">
               <template #default="{ row }">
-                <img :src="row.cover_path || defaultCover" class="book-cover" />
+                <img :src="getCoverUrl(row.cover_path)" class="book-cover" />
               </template>
             </el-table-column>
             <el-table-column prop="title" label="书名" min-width="150" show-overflow-tooltip />
@@ -154,6 +154,15 @@ import { statisticsApi } from '@/api/statistics'
 import { formatNumber } from '@/utils'
 
 const defaultCover = '/images/default-cover.png'
+
+// 获取封面完整URL
+const getCoverUrl = (coverPath: string | undefined | null): string => {
+  if (!coverPath) return defaultCover
+  if (coverPath.startsWith('data:') || coverPath.startsWith('http') || coverPath.startsWith('/')) {
+    return coverPath
+  }
+  return `/uploads/${coverPath}`
+}
 
 // 日期范围
 const dateRange = ref<[string, string] | null>(null)

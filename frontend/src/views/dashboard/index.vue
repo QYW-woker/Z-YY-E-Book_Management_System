@@ -95,7 +95,7 @@
               class="ranking-item"
             >
               <span class="ranking-num" :class="{ top: index < 3 }">{{ index + 1 }}</span>
-              <img :src="item.cover_path || defaultCover" class="ranking-cover" />
+              <img :src="getCoverUrl(item.cover_path)" class="ranking-cover" />
               <div class="ranking-info">
                 <div class="ranking-title">{{ item.title }}</div>
                 <div class="ranking-author">{{ item.author }}</div>
@@ -121,7 +121,7 @@
               class="ranking-item"
             >
               <span class="ranking-num" :class="{ top: index < 3 }">{{ index + 1 }}</span>
-              <img :src="item.cover_path || defaultCover" class="ranking-cover" />
+              <img :src="getCoverUrl(item.cover_path)" class="ranking-cover" />
               <div class="ranking-info">
                 <div class="ranking-title">{{ item.title }}</div>
                 <div class="ranking-author">{{ item.author }}</div>
@@ -148,6 +148,15 @@ const authStore = useAuthStore()
 const admin = computed(() => authStore.admin)
 
 const defaultCover = '/images/default-cover.png'
+
+// 获取封面完整URL
+const getCoverUrl = (coverPath: string | undefined | null): string => {
+  if (!coverPath) return defaultCover
+  if (coverPath.startsWith('data:') || coverPath.startsWith('http') || coverPath.startsWith('/')) {
+    return coverPath
+  }
+  return `/uploads/${coverPath}`
+}
 
 // 统计概览
 const overview = ref<StatisticsOverview>({
