@@ -196,15 +196,19 @@ export const bookController = {
 
         // 如果是 PDF 文件，自动提取首页作为封面
         if (ext === 'pdf') {
+          console.log('[import] Detected PDF file, extracting cover...');
           try {
             const fullFilePath = path.join(config.upload.dir, filePath);
+            console.log('[import] Full file path:', fullFilePath);
             const coverPath = await extractPdfCover(fullFilePath);
+            console.log('[import] Cover extraction result:', coverPath);
             if (coverPath) {
               bookService.update(book.book_id, { cover_path: coverPath });
+              console.log('[import] Book cover updated successfully');
             }
           } catch (coverErr) {
             // 封面提取失败不影响导入结果，仅记录日志
-            console.warn(`Failed to extract cover for ${originalname}:`, coverErr);
+            console.warn(`[import] Failed to extract cover for ${originalname}:`, coverErr);
           }
         }
 
