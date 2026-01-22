@@ -29,28 +29,38 @@ app.get('/health', (_req, res) => {
 // 错误处理
 app.use(errorHandler);
 
-// 初始化数据库
-initDatabase();
+// 启动函数
+async function start() {
+  try {
+    // 初始化数据库
+    await initDatabase();
 
-// 初始化默认管理员
-adminService.initDefaultAdmin(config.defaultAdmin.username, config.defaultAdmin.password);
-logger.info(`Default admin: ${config.defaultAdmin.username} / ${config.defaultAdmin.password}`);
+    // 初始化默认管理员
+    adminService.initDefaultAdmin(config.defaultAdmin.username, config.defaultAdmin.password);
+    logger.info(`Default admin: ${config.defaultAdmin.username} / ${config.defaultAdmin.password}`);
 
-// 启动服务器
-const server = app.listen(config.port, () => {
-  logger.info(`Server is running on http://localhost:${config.port}`);
-  logger.info(`Environment: ${config.nodeEnv}`);
-});
+    // 启动服务器
+    const server = app.listen(config.port, () => {
+      logger.info(`Server is running on http://localhost:${config.port}`);
+      logger.info(`Environment: ${config.nodeEnv}`);
+    });
 
-// 优雅关闭
-const gracefulShutdown = () => {
-  logger.info('Shutting down gracefully...');
-  server.close(() => {
-    closeDatabase();
-    logger.info('Server closed');
-    process.exit(0);
-  });
-};
+    // 优雅关闭
+    const gracefulShutdown = () => {
+      logger.info('Shutting down gracefully...');
+      server.close(() => {
+        closeDatabase();
+        logger.info('Server closed');
+        process.exit(0);
+      });
+    };
 
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+    process.on('SIGTERM', gracefulShutdown);
+    process.on('SIGINT', gracefulShutdown);
+  } catch (err) {
+    logger.error('Failed to start server', err);
+    process.exit(1);
+  }
+}
+
+start();
