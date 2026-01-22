@@ -127,7 +127,18 @@
         <!-- 右侧封面和文件信息 -->
         <el-col :xs="24" :lg="8">
           <div class="card cover-card">
-            <h3 class="card-title">封面图片</h3>
+            <div class="card-header">
+              <h3 class="card-title">封面图片</h3>
+              <el-button
+                v-if="isEdit"
+                type="primary"
+                size="small"
+                :loading="extractingCover"
+                @click="handleExtractCover"
+              >
+                一键提取封面
+              </el-button>
+            </div>
             <div class="cover-upload">
               <el-upload
                 class="cover-uploader"
@@ -146,18 +157,9 @@
                 <p>建议尺寸: 400x600 (比例2:3)</p>
                 <p>格式: JPG/PNG, 最大2MB</p>
               </div>
-              <div class="cover-actions">
-                <el-button
-                  type="primary"
-                  :loading="extractingCover"
-                  @click="handleExtractCover"
-                >
-                  提取文件封面
-                </el-button>
-                <el-button v-if="form.cover_path" type="danger" text @click="form.cover_path = ''">
-                  删除封面
-                </el-button>
-              </div>
+              <el-button v-if="form.cover_path" type="danger" text size="small" @click="form.cover_path = ''">
+                删除封面
+              </el-button>
             </div>
           </div>
 
@@ -397,8 +399,15 @@ onMounted(() => {
 
     &.cover-card,
     &.file-card {
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
       .card-title {
-        margin: 0 0 16px;
+        margin: 0;
         font-size: 16px;
         font-weight: 600;
         color: #303133;
@@ -453,13 +462,6 @@ onMounted(() => {
         font-size: 12px;
         color: #909399;
       }
-    }
-
-    .cover-actions {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
     }
   }
 
