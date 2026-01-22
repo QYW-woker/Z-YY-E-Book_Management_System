@@ -51,18 +51,18 @@
             <template #default="{ row }">
               <div class="file-name">
                 <el-icon><Document /></el-icon>
-                <span>{{ row.name }}</span>
+                <span>{{ row.filename }}</span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="格式" width="80">
             <template #default="{ row }">
-              <el-tag size="small" type="info">{{ getFileFormat(row.name) }}</el-tag>
+              <el-tag size="small" type="info">{{ getFileFormat(row.filename) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="大小" width="100">
             <template #default="{ row }">
-              {{ formatFileSize(row.size) }}
+              {{ formatFileSize(row.file?.size || 0) }}
             </template>
           </el-table-column>
           <el-table-column label="状态" width="120">
