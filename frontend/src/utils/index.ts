@@ -62,7 +62,8 @@ export function throttle<T extends (...args: any[]) => any>(
 /**
  * 获取文件扩展名
  */
-export function getFileExtension(filename: string): string {
+export function getFileExtension(filename: string | undefined | null): string {
+  if (!filename) return ''
   const lastDot = filename.lastIndexOf('.')
   if (lastDot === -1) return ''
   return filename.slice(lastDot + 1).toLowerCase()
