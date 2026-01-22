@@ -5,6 +5,7 @@ import { bookService } from '../services/bookService.js';
 import { config } from '../config/index.js';
 import { success, error, paginated } from '../utils/response.js';
 import type { AuthRequest, BookStatus } from '../types/index.js';
+import { extractPdfCover } from '../utils/pdfCover.js';
 
 export const bookController = {
   // 获取书籍列表
@@ -167,7 +168,7 @@ export const bookController = {
   },
 
   // 导入书籍
-  import(req: Request, res: Response): void {
+  async import(req: Request, res: Response): Promise<void> {
     const files = req.files as Express.Multer.File[];
 
     if (!files || files.length === 0) {
@@ -177,20 +178,35 @@ export const bookController = {
 
     const results: { filename: string; success: boolean; book_id?: string; error?: string }[] = [];
 
-    files.forEach((file) => {
+    for (const file of files) {
       try {
         // 修复中文文件名编码问题 (multer 使用 latin1，需要转换为 UTF-8)
         const originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
         const ext = path.extname(originalname).toLowerCase().slice(1);
         const title = path.basename(originalname, path.extname(originalname));
+        const filePath = `${config.upload.booksDir}/${file.filename}`;
 
         const book = bookService.create({
           title,
           format: ext,
-          file_path: `${config.upload.booksDir}/${file.filename}`,
+          file_path: filePath,
           file_size: file.size,
           status: 'draft',
         });
+
+        // 如果是 PDF 文件，自动提取首页作为封面
+        if (ext === 'pdf') {
+          try {
+            const fullFilePath = path.join(config.upload.dir, filePath);
+            const coverPath = await extractPdfCover(fullFilePath);
+            if (coverPath) {
+              bookService.update(book.book_id, { cover_path: coverPath });
+            }
+          } catch (coverErr) {
+            // 封面提取失败不影响导入结果，仅记录日志
+            console.warn(`Failed to extract cover for ${originalname}:`, coverErr);
+          }
+        }
 
         results.push({
           filename: originalname,
@@ -209,7 +225,7 @@ export const bookController = {
           error: err.message || '导入失败',
         });
       }
-    });
+    }
 
     const successCount = results.filter((r) => r.success).length;
     const failedCount = results.filter((r) => !r.success).length;
