@@ -20,7 +20,7 @@
               <el-button type="primary" :loading="fetching" @click="handleFetchMetadata">
                 <el-icon><MagicStick /></el-icon>一键抓取
               </el-button>
-              <span class="fetch-tip">根据书名从豆瓣自动获取元数据</span>
+              <span class="fetch-tip">根据书名联网获取元数据</span>
             </div>
             <el-divider />
             <el-form
