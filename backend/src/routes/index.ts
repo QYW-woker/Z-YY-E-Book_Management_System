@@ -23,14 +23,11 @@ router.post('/admin/change-password', (req, res) => authController.changePasswor
 router.post('/admin/logout', (req, res) => authController.logout(req as AuthRequest, res));
 
 // ==================== 电子书管理 ====================
+// 注意：不带参数的路由必须放在 :id 路由之前，否则会被 :id 匹配
 router.get('/admin/books', bookController.getList);
-router.get('/admin/books/:id', bookController.getById);
 router.post('/admin/books', bookController.create);
-router.put('/admin/books/:id', bookController.update);
-router.delete('/admin/books/:id', bookController.delete);
 router.post('/admin/books/batch-delete', bookController.batchDelete);
 router.post('/admin/books/batch-update', bookController.batchUpdate);
-router.patch('/admin/books/:id/status', bookController.updateStatus);
 router.post('/admin/books/batch-status', bookController.batchUpdateStatus);
 router.get('/admin/books/search-douban', (req, res, next) => {
   bookController.searchDouban(req, res).catch(next);
@@ -41,12 +38,17 @@ router.post('/admin/books/preview-cover', uploadBooks.single('file'), (req, res,
 router.post('/admin/books/import', uploadBooks.array('files', 50), (req, res, next) => {
   bookController.import(req, res).catch(next);
 });
+router.post('/admin/books/export', bookController.export);
+// 带 :id 参数的路由放在后面
+router.get('/admin/books/:id', bookController.getById);
+router.put('/admin/books/:id', bookController.update);
+router.delete('/admin/books/:id', bookController.delete);
+router.patch('/admin/books/:id/status', bookController.updateStatus);
 router.post('/admin/books/:id/cover', uploadCover.single('cover'), bookController.uploadCover);
 router.post('/admin/books/:id/extract-cover', (req, res, next) => {
   bookController.extractCover(req, res).catch(next);
 });
 router.get('/admin/books/:id/download', (req, res) => bookController.download(req as AuthRequest, res));
-router.post('/admin/books/export', bookController.export);
 
 // ==================== 分类管理 ====================
 router.get('/admin/categories', categoryController.getList);
