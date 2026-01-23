@@ -212,15 +212,24 @@ const getFileFormat = (filename: string): string => {
 
 // 提取电子书封面预览
 const extractCoverPreview = async (filename: string, file: File) => {
+  console.log('[extractCoverPreview] ====== Function called ======')
+  console.log('[extractCoverPreview] filename:', filename)
+  console.log('[extractCoverPreview] file:', file)
   const ext = getFileExtension(filename)
+  console.log('[extractCoverPreview] extension:', ext)
   const supportedFormats = ['pdf', 'epub', 'mobi', 'azw3', 'azw']
   if (!supportedFormats.includes(ext)) {
+    console.log('[extractCoverPreview] Format not supported, returning')
     return
   }
 
   // 找到数组中的索引
   const index = uploadFiles.value.findIndex(f => f.filename === filename)
-  if (index === -1) return
+  console.log('[extractCoverPreview] Found index:', index)
+  if (index === -1) {
+    console.log('[extractCoverPreview] File not found in uploadFiles, returning')
+    return
+  }
 
   // 通过索引更新，确保触发Vue响应式
   uploadFiles.value[index].coverLoading = true
@@ -294,7 +303,9 @@ const handleFileChange = (file: UploadFile) => {
   uploadFiles.value.push(fileItem)
 
   // 自动提取封面预览（支持PDF、EPUB、MOBI、AZW3格式）
+  console.log('[handleFileChange] About to call extractCoverPreview for:', file.name)
   extractCoverPreview(file.name, rawFile)
+  console.log('[handleFileChange] extractCoverPreview called')
 }
 
 // 处理文件移除
