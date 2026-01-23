@@ -515,21 +515,32 @@ export const bookController = {
 
           const html = await detailResponse.text();
 
-          // 解析详情页
-          const publisherMatch = html.match(/<span class="pl">出版社:<\/span>\s*([^<]+)/);
-          const pubdateMatch = html.match(/<span class="pl">出版年:<\/span>\s*([^<]+)/);
-          const isbnMatch = html.match(/<span class="pl">ISBN:<\/span>\s*([^<]+)/);
-          const descMatch = html.match(/<div class="intro">\s*<p>([^<]+)<\/p>/);
-          const authorMatch = html.match(/<span class="pl">\s*作者<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>/);
+          // 解析详情页 - 使用更灵活的正则表达式
+          // 出版社可能是纯文本或链接
+          const publisherMatch = html.match(/<span class="pl">出版社:<\/span>\s*(?:<a[^>]*>)?([^<]+)(?:<\/a>)?/);
+          // 出版年
+          const pubdateMatch = html.match(/<span class="pl">出版年:<\/span>\s*([^<\n]+)/);
+          // ISBN
+          const isbnMatch = html.match(/<span class="pl">ISBN:<\/span>\s*(\d+)/);
+          // 简介 - 匹配 intro 区域内的内容
+          const descMatch = html.match(/<div class="intro">\s*<p>([\s\S]*?)<\/p>/);
+          // 作者 - 可能有多个作者，取第一个
+          const authorMatch = html.match(/<span class="pl">\s*作者[\s\S]*?<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>/);
+
+          // 清理提取的文本
+          const cleanText = (text: string | undefined) => {
+            if (!text) return '';
+            return text.replace(/\s+/g, ' ').trim();
+          };
 
           results.push({
             title: item.title || '',
-            author: authorMatch ? authorMatch[1].trim() : (item.author_name || ''),
-            publisher: publisherMatch ? publisherMatch[1].trim() : '',
-            publish_date: pubdateMatch ? pubdateMatch[1].trim() : (item.year || ''),
-            isbn: isbnMatch ? isbnMatch[1].trim() : '',
+            author: cleanText(authorMatch?.[1]) || item.author_name || '',
+            publisher: cleanText(publisherMatch?.[1]) || '',
+            publish_date: cleanText(pubdateMatch?.[1]) || item.year || '',
+            isbn: cleanText(isbnMatch?.[1]) || '',
             language: 'zh-CN',
-            description: descMatch ? descMatch[1].trim() : '',
+            description: cleanText(descMatch?.[1]) || '',
             cover: item.pic || '',
           });
 
