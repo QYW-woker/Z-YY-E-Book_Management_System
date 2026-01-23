@@ -270,7 +270,11 @@ const extractCoverPreview = async (filename: string, file: File) => {
 
 // 处理文件变化
 const handleFileChange = (file: UploadFile) => {
+  console.log('[handleFileChange] ====== START ======')
+  console.log('[handleFileChange] file.name:', file.name)
+  console.log('[handleFileChange] file.raw:', file.raw)
   const ext = getFileExtension(file.name)
+  console.log('[handleFileChange] extension:', ext)
 
   // 检查格式
   if (!allowedFormats.includes(ext)) {
