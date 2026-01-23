@@ -233,18 +233,19 @@ const handleCommand = (command: string) => {
 <style lang="scss" scoped>
 $primary-color: #2E6BE6;
 $primary-light: #5B8FF9;
-$sidebar-bg: #001529;
-$sidebar-bg-light: #001d35;
+$sidebar-bg: #ffffff;
+$sidebar-border: #E5E6EB;
 
 .main-layout {
   height: 100vh;
 }
 
 .sidebar {
-  background: linear-gradient(180deg, $sidebar-bg 0%, darken($sidebar-bg, 3%) 100%);
+  background: $sidebar-bg;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 1px 0 4px rgba(0, 0, 0, 0.05);
+  border-right: 1px solid $sidebar-border;
 
   .logo {
     height: 56px;
@@ -253,8 +254,8 @@ $sidebar-bg-light: #001d35;
     justify-content: center;
     padding: 0 16px;
     gap: 10px;
-    background: $sidebar-bg-light;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: $sidebar-bg;
+    border-bottom: 1px solid $sidebar-border;
 
     .logo-icon {
       width: 36px;
@@ -269,7 +270,7 @@ $sidebar-bg-light: #001d35;
     }
 
     .logo-text {
-      color: #fff;
+      color: #1F2329;
       font-size: 16px;
       font-weight: 600;
       white-space: nowrap;
@@ -287,7 +288,7 @@ $sidebar-bg-light: #001d35;
       line-height: 44px;
       margin: 4px 0;
       border-radius: 8px;
-      color: rgba(255, 255, 255, 0.7);
+      color: #4E5969;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
       .el-icon {
@@ -295,8 +296,8 @@ $sidebar-bg-light: #001d35;
       }
 
       &:hover {
-        color: #fff;
-        background-color: rgba(255, 255, 255, 0.08);
+        color: $primary-color;
+        background-color: #F2F3F5;
       }
 
       &.is-active {
