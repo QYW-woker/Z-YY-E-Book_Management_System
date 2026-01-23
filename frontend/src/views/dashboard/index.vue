@@ -1,53 +1,65 @@
 <template>
   <div class="page-container dashboard">
     <div class="page-header">
-      <h1 class="page-title">仪表盘</h1>
+      <h1 class="page-title">工作台</h1>
       <p class="page-description">欢迎回来，{{ admin?.nickname || admin?.username }}</p>
     </div>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="stat-cards">
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <div class="stat-icon books">
-            <el-icon :size="28"><Reading /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ formatNumber(overview.total_books) }}</div>
+        <div class="stat-card blue">
+          <div class="stat-content">
+            <div class="stat-value">{{ formatNumber(overview.total_books) }}<span class="unit">册</span></div>
             <div class="stat-label">电子书总数</div>
           </div>
+          <div class="stat-decoration">
+            <svg viewBox="0 0 100 100" class="decoration-svg">
+              <circle cx="80" cy="20" r="40" fill="rgba(255,255,255,0.1)"/>
+              <circle cx="90" cy="60" r="30" fill="rgba(255,255,255,0.08)"/>
+            </svg>
+          </div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <div class="stat-icon published">
-            <el-icon :size="28"><SuccessFilled /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ formatNumber(overview.published_books) }}</div>
+        <div class="stat-card green">
+          <div class="stat-content">
+            <div class="stat-value">{{ formatNumber(overview.published_books) }}<span class="unit">册</span></div>
             <div class="stat-label">已上架</div>
           </div>
+          <div class="stat-decoration">
+            <svg viewBox="0 0 100 100" class="decoration-svg">
+              <circle cx="80" cy="20" r="40" fill="rgba(255,255,255,0.1)"/>
+              <circle cx="90" cy="60" r="30" fill="rgba(255,255,255,0.08)"/>
+            </svg>
+          </div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <div class="stat-icon downloads">
-            <el-icon :size="28"><Download /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ formatNumber(overview.today_downloads) }}</div>
+        <div class="stat-card orange">
+          <div class="stat-content">
+            <div class="stat-value">{{ formatNumber(overview.today_downloads) }}<span class="unit">次</span></div>
             <div class="stat-label">今日下载</div>
           </div>
+          <div class="stat-decoration">
+            <svg viewBox="0 0 100 100" class="decoration-svg">
+              <circle cx="80" cy="20" r="40" fill="rgba(255,255,255,0.1)"/>
+              <circle cx="90" cy="60" r="30" fill="rgba(255,255,255,0.08)"/>
+            </svg>
+          </div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card">
-          <div class="stat-icon views">
-            <el-icon :size="28"><View /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ formatNumber(overview.today_views) }}</div>
+        <div class="stat-card purple">
+          <div class="stat-content">
+            <div class="stat-value">{{ formatNumber(overview.today_views) }}<span class="unit">次</span></div>
             <div class="stat-label">今日浏览</div>
+          </div>
+          <div class="stat-decoration">
+            <svg viewBox="0 0 100 100" class="decoration-svg">
+              <circle cx="80" cy="20" r="40" fill="rgba(255,255,255,0.1)"/>
+              <circle cx="90" cy="60" r="30" fill="rgba(255,255,255,0.08)"/>
+            </svg>
           </div>
         </div>
       </el-col>
@@ -100,7 +112,7 @@
                 <div class="ranking-title">{{ item.title }}</div>
                 <div class="ranking-author">{{ item.author }}</div>
               </div>
-              <span class="ranking-count">{{ formatNumber(item.count) }}</span>
+              <span class="ranking-count">{{ formatNumber(item.count) }}次</span>
             </div>
             <el-empty v-if="!downloadRanking.length" description="暂无数据" />
           </div>
@@ -126,7 +138,7 @@
                 <div class="ranking-title">{{ item.title }}</div>
                 <div class="ranking-author">{{ item.author }}</div>
               </div>
-              <span class="ranking-count">{{ formatNumber(item.count) }}</span>
+              <span class="ranking-count">{{ formatNumber(item.count) }}次</span>
             </div>
             <el-empty v-if="!viewRanking.length" description="暂无数据" />
           </div>
@@ -261,42 +273,67 @@ const renderTrendChart = () => {
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'cross' },
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: '#E5E6EB',
+      borderWidth: 1,
+      textStyle: { color: '#1F2329' },
     },
     legend: {
       data: ['下载量', '浏览量'],
       bottom: 0,
+      textStyle: { color: '#86909C' },
     },
     grid: {
       left: '3%',
       right: '4%',
-      bottom: '12%',
-      top: '3%',
+      bottom: '15%',
+      top: '5%',
       containLabel: true,
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: trendData.value.map((d) => d.date),
+      axisLine: { lineStyle: { color: '#E5E6EB' } },
+      axisLabel: { color: '#86909C' },
     },
     yAxis: {
       type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: '#F2F3F5', type: 'dashed' } },
+      axisLabel: { color: '#86909C' },
     },
     series: [
       {
         name: '下载量',
         type: 'line',
         smooth: true,
-        areaStyle: { opacity: 0.3 },
+        areaStyle: {
+          opacity: 0.3,
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(46, 107, 230, 0.3)' },
+            { offset: 1, color: 'rgba(46, 107, 230, 0.05)' }
+          ])
+        },
         data: trendData.value.map((d) => d.downloads),
-        itemStyle: { color: '#409eff' },
+        itemStyle: { color: '#2E6BE6' },
+        lineStyle: { width: 2 },
       },
       {
         name: '浏览量',
         type: 'line',
         smooth: true,
-        areaStyle: { opacity: 0.3 },
+        areaStyle: {
+          opacity: 0.3,
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(82, 196, 26, 0.3)' },
+            { offset: 1, color: 'rgba(82, 196, 26, 0.05)' }
+          ])
+        },
         data: trendData.value.map((d) => d.views),
-        itemStyle: { color: '#67c23a' },
+        itemStyle: { color: '#52C41A' },
+        lineStyle: { width: 2 },
       },
     ],
   }
@@ -316,15 +353,21 @@ const renderStatusChart = () => {
     tooltip: {
       trigger: 'item',
       formatter: '{b}: {c} ({d}%)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: '#E5E6EB',
+      borderWidth: 1,
+      textStyle: { color: '#1F2329' },
     },
     legend: {
       bottom: 0,
       left: 'center',
+      textStyle: { color: '#86909C' },
     },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['45%', '70%'],
+        center: ['50%', '45%'],
         avoidLabelOverlap: false,
         label: {
           show: false,
@@ -333,17 +376,18 @@ const renderStatusChart = () => {
         emphasis: {
           label: {
             show: true,
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: 'bold',
+            color: '#1F2329',
           },
         },
         labelLine: {
           show: false,
         },
         data: [
-          { value: overview.value.published_books, name: '已上架', itemStyle: { color: '#67c23a' } },
-          { value: overview.value.draft_books, name: '草稿', itemStyle: { color: '#909399' } },
-          { value: overview.value.archived_books, name: '已下架', itemStyle: { color: '#e6a23c' } },
+          { value: overview.value.published_books, name: '已上架', itemStyle: { color: '#52C41A' } },
+          { value: overview.value.draft_books, name: '草稿', itemStyle: { color: '#86909C' } },
+          { value: overview.value.archived_books, name: '已下架', itemStyle: { color: '#FAAD14' } },
         ],
       },
     ],
@@ -373,47 +417,92 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+$primary-color: #2E6BE6;
+$primary-light: #5B8FF9;
+
 .dashboard {
   .stat-cards {
     margin-bottom: 16px;
   }
 
   .stat-card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
+    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+    border-radius: 12px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+    min-height: 100px;
     display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba($primary-color, 0.25);
+    transition: transform 0.25s, box-shadow 0.25s;
 
-    .stat-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-
-      &.books { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-      &.published { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-      &.downloads { background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); }
-      &.views { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba($primary-color, 0.35);
     }
 
-    .stat-info {
-      .stat-value {
-        font-size: 28px;
-        font-weight: 600;
-        color: #303133;
-        line-height: 1.2;
-      }
+    &.blue {
+      background: linear-gradient(135deg, #2E6BE6 0%, #5B8FF9 100%);
+      box-shadow: 0 4px 12px rgba(#2E6BE6, 0.25);
+      &:hover { box-shadow: 0 8px 20px rgba(#2E6BE6, 0.35); }
+    }
 
-      .stat-label {
+    &.green {
+      background: linear-gradient(135deg, #52C41A 0%, #95DE64 100%);
+      box-shadow: 0 4px 12px rgba(#52C41A, 0.25);
+      &:hover { box-shadow: 0 8px 20px rgba(#52C41A, 0.35); }
+    }
+
+    &.orange {
+      background: linear-gradient(135deg, #FA8C16 0%, #FFC53D 100%);
+      box-shadow: 0 4px 12px rgba(#FA8C16, 0.25);
+      &:hover { box-shadow: 0 8px 20px rgba(#FA8C16, 0.35); }
+    }
+
+    &.purple {
+      background: linear-gradient(135deg, #722ED1 0%, #B37FEB 100%);
+      box-shadow: 0 4px 12px rgba(#722ED1, 0.25);
+      &:hover { box-shadow: 0 8px 20px rgba(#722ED1, 0.35); }
+    }
+
+    .stat-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+
+      .unit {
         font-size: 14px;
-        color: #909399;
-        margin-top: 4px;
+        font-weight: 400;
+        margin-left: 4px;
+        opacity: 0.85;
+      }
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 8px;
+    }
+
+    .stat-decoration {
+      position: absolute;
+      right: -20px;
+      top: -20px;
+      width: 120px;
+      height: 120px;
+      opacity: 0.6;
+
+      .decoration-svg {
+        width: 100%;
+        height: 100%;
       }
     }
   }
@@ -428,12 +517,25 @@ onUnmounted(() => {
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #F2F3F5;
 
       h3 {
         margin: 0;
         font-size: 16px;
         font-weight: 600;
-        color: #303133;
+        color: #1F2329;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 16px;
+          background: linear-gradient(180deg, $primary-color 0%, $primary-light 100%);
+          border-radius: 2px;
+        }
       }
     }
 
@@ -448,12 +550,25 @@ onUnmounted(() => {
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #F2F3F5;
 
       h3 {
         margin: 0;
         font-size: 16px;
         font-weight: 600;
-        color: #303133;
+        color: #1F2329;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 16px;
+          background: linear-gradient(180deg, $primary-color 0%, $primary-light 100%);
+          border-radius: 2px;
+        }
       }
     }
 
@@ -466,7 +581,14 @@ onUnmounted(() => {
       display: flex;
       align-items: center;
       padding: 12px 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid #F7F8FA;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #FAFBFC;
+        margin: 0 -20px;
+        padding: 12px 20px;
+      }
 
       &:last-child {
         border-bottom: none;
@@ -475,18 +597,19 @@ onUnmounted(() => {
       .ranking-num {
         width: 24px;
         height: 24px;
-        border-radius: 4px;
-        background: #f0f2f5;
-        color: #909399;
+        border-radius: 6px;
+        background: #F2F3F5;
+        color: #86909C;
         font-size: 12px;
         font-weight: 600;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-right: 12px;
+        flex-shrink: 0;
 
         &.top {
-          background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+          background: linear-gradient(135deg, #FA8C16 0%, #FFC53D 100%);
           color: #fff;
         }
       }
@@ -495,9 +618,10 @@ onUnmounted(() => {
         width: 40px;
         height: 54px;
         object-fit: cover;
-        border-radius: 4px;
-        background: #f0f2f5;
+        border-radius: 6px;
+        background: #F2F3F5;
         margin-right: 12px;
+        flex-shrink: 0;
       }
 
       .ranking-info {
@@ -506,7 +630,8 @@ onUnmounted(() => {
 
         .ranking-title {
           font-size: 14px;
-          color: #303133;
+          color: #1F2329;
+          font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -514,7 +639,7 @@ onUnmounted(() => {
 
         .ranking-author {
           font-size: 12px;
-          color: #909399;
+          color: #86909C;
           margin-top: 4px;
         }
       }
@@ -522,8 +647,9 @@ onUnmounted(() => {
       .ranking-count {
         font-size: 14px;
         font-weight: 600;
-        color: #409eff;
+        color: $primary-color;
         margin-left: 12px;
+        flex-shrink: 0;
       }
     }
   }

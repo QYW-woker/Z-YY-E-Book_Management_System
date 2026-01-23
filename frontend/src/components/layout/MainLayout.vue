@@ -2,7 +2,9 @@
   <el-container class="main-layout">
     <el-aside :width="sidebarWidth" class="sidebar">
       <div class="logo">
-        <el-icon :size="28" color="#409eff"><Reading /></el-icon>
+        <div class="logo-icon">
+          <el-icon :size="24"><Reading /></el-icon>
+        </div>
         <span v-show="!collapsed" class="logo-text">电子书管理</span>
       </div>
       <el-menu
@@ -26,7 +28,7 @@
         <div class="header-left">
           <el-icon
             class="collapse-btn"
-            :size="20"
+            :size="18"
             @click="toggleSidebar"
           >
             <component :is="collapsed ? 'Expand' : 'Fold'" />
@@ -41,11 +43,11 @@
         <div class="header-right">
           <el-dropdown trigger="click" @command="handleCommand">
             <div class="user-info">
-              <el-avatar :size="32" :src="admin?.avatar">
+              <el-avatar :size="32" :src="admin?.avatar" class="user-avatar">
                 {{ admin?.nickname?.charAt(0) || 'A' }}
               </el-avatar>
               <span class="username">{{ admin?.nickname || admin?.username }}</span>
-              <el-icon><ArrowDown /></el-icon>
+              <el-icon class="arrow-icon"><ArrowDown /></el-icon>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
@@ -130,7 +132,7 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 
 const collapsed = computed(() => appStore.sidebarCollapsed)
-const sidebarWidth = computed(() => (collapsed.value ? '64px' : '220px'))
+const sidebarWidth = computed(() => (collapsed.value ? '64px' : '200px'))
 const admin = computed(() => authStore.admin)
 
 const currentRoute = computed(() => route)
@@ -229,38 +231,68 @@ const handleCommand = (command: string) => {
 </script>
 
 <style lang="scss" scoped>
+$primary-color: #2E6BE6;
+$primary-light: #5B8FF9;
+$sidebar-bg: #001529;
+$sidebar-bg-light: #001d35;
+
 .main-layout {
   height: 100vh;
 }
 
 .sidebar {
-  background-color: #001529;
-  transition: width 0.3s;
+  background: linear-gradient(180deg, $sidebar-bg 0%, darken($sidebar-bg, 3%) 100%);
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
 
   .logo {
-    height: 60px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 16px;
-    gap: 8px;
-    background-color: #002140;
+    gap: 10px;
+    background: $sidebar-bg-light;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
 
     .logo-text {
       color: #fff;
       font-size: 16px;
       font-weight: 600;
       white-space: nowrap;
+      letter-spacing: 1px;
     }
   }
 
   .sidebar-menu {
     border-right: none;
     background-color: transparent;
+    padding: 8px;
 
     :deep(.el-menu-item) {
-      color: rgba(255, 255, 255, 0.65);
+      height: 44px;
+      line-height: 44px;
+      margin: 4px 0;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      .el-icon {
+        font-size: 18px;
+      }
 
       &:hover {
         color: #fff;
@@ -269,14 +301,22 @@ const handleCommand = (command: string) => {
 
       &.is-active {
         color: #fff;
-        background-color: #1890ff;
+        background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+        box-shadow: 0 4px 12px rgba($primary-color, 0.4);
+      }
+    }
+
+    &.el-menu--collapse {
+      :deep(.el-menu-item) {
+        padding: 0 !important;
+        justify-content: center;
       }
     }
   }
 }
 
 .main-container {
-  background-color: #f0f2f5;
+  background-color: #F5F7FA;
 }
 
 .header {
@@ -284,8 +324,9 @@ const handleCommand = (command: string) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  padding: 0 24px;
+  height: 56px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   z-index: 10;
 
   .header-left {
@@ -295,12 +336,31 @@ const handleCommand = (command: string) => {
 
     .collapse-btn {
       cursor: pointer;
-      padding: 4px;
-      border-radius: 4px;
-      transition: background-color 0.3s;
+      padding: 8px;
+      border-radius: 8px;
+      color: #4E5969;
+      transition: all 0.25s;
 
       &:hover {
-        background-color: #f0f2f5;
+        background-color: #F2F3F5;
+        color: $primary-color;
+      }
+    }
+
+    :deep(.el-breadcrumb) {
+      font-size: 14px;
+
+      .el-breadcrumb__inner {
+        color: #86909C;
+
+        &.is-link:hover {
+          color: $primary-color;
+        }
+      }
+
+      .el-breadcrumb__item:last-child .el-breadcrumb__inner {
+        color: #1F2329;
+        font-weight: 500;
       }
     }
   }
@@ -309,19 +369,31 @@ const handleCommand = (command: string) => {
     .user-info {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: background-color 0.3s;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.25s;
 
       &:hover {
-        background-color: #f0f2f5;
+        background-color: #F2F3F5;
+      }
+
+      .user-avatar {
+        background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+        color: #fff;
+        font-weight: 600;
       }
 
       .username {
         font-size: 14px;
-        color: #303133;
+        color: #1F2329;
+        font-weight: 500;
+      }
+
+      .arrow-icon {
+        color: #86909C;
+        font-size: 12px;
       }
     }
   }
@@ -330,6 +402,7 @@ const handleCommand = (command: string) => {
 .main-content {
   padding: 0;
   overflow: auto;
+  background-color: #F5F7FA;
 }
 
 .fade-enter-active,

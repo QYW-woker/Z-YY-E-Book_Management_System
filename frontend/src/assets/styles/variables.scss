@@ -1,40 +1,55 @@
-// 颜色变量
-$primary-color: #409eff;
-$success-color: #67c23a;
-$warning-color: #e6a23c;
-$danger-color: #f56c6c;
+// 主题颜色 - 蓝色系
+$primary-color: #2E6BE6;
+$primary-light: #5B8FF9;
+$primary-lighter: #E8F1FF;
+$primary-dark: #1E4FC2;
+
+// 功能色
+$success-color: #52C41A;
+$warning-color: #FAAD14;
+$danger-color: #FF4D4F;
 $info-color: #909399;
 
 // 文字颜色
-$text-primary: #303133;
-$text-regular: #606266;
-$text-secondary: #909399;
-$text-placeholder: #c0c4cc;
+$text-primary: #1F2329;
+$text-regular: #4E5969;
+$text-secondary: #86909C;
+$text-placeholder: #C9CDD4;
 
 // 边框颜色
-$border-base: #dcdfe6;
-$border-light: #e4e7ed;
-$border-lighter: #ebeef5;
-$border-extra-light: #f2f6fc;
+$border-base: #E5E6EB;
+$border-light: #F2F3F5;
+$border-lighter: #F7F8FA;
+$border-extra-light: #FAFBFC;
 
 // 背景颜色
-$bg-color: #f5f7fa;
-$bg-color-light: #fafafa;
-$bg-color-white: #ffffff;
+$bg-color: #F5F7FA;
+$bg-color-light: #FAFBFC;
+$bg-color-white: #FFFFFF;
+$bg-color-overlay: rgba(0, 0, 0, 0.45);
 
 // 布局相关
-$header-height: 60px;
-$sidebar-width: 220px;
+$header-height: 56px;
+$sidebar-width: 200px;
 $sidebar-collapsed-width: 64px;
 
 // 圆角
-$border-radius-base: 4px;
-$border-radius-small: 2px;
-$border-radius-large: 8px;
+$border-radius-small: 4px;
+$border-radius-base: 8px;
+$border-radius-large: 12px;
+$border-radius-xlarge: 16px;
 
 // 阴影
-$box-shadow-base: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-$box-shadow-light: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
+$box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.08);
+$box-shadow-light: 0 1px 4px rgba(0, 0, 0, 0.05);
+$box-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
 
 // 过渡
-$transition-duration: 0.3s;
+$transition-duration: 0.25s;
+$transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+// 渐变色
+$gradient-primary: linear-gradient(135deg, #2E6BE6 0%, #5B8FF9 100%);
+$gradient-success: linear-gradient(135deg, #52C41A 0%, #95DE64 100%);
+$gradient-warning: linear-gradient(135deg, #FAAD14 0%, #FFD666 100%);
+$gradient-info: linear-gradient(135deg, #1890FF 0%, #69C0FF 100%);
