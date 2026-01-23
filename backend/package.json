@@ -11,6 +11,8 @@
     "lint": "eslint src --ext .ts --fix"
   },
   "dependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "adm-zip": "^0.5.16",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dayjs": "^1.11.10",

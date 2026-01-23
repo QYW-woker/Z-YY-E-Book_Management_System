@@ -210,10 +210,11 @@ const getFileFormat = (filename: string): string => {
   return getFileExtension(filename).toUpperCase()
 }
 
-// 提取PDF封面预览
+// 提取电子书封面预览
 const extractCoverPreview = async (filename: string, file: File) => {
   const ext = getFileExtension(filename)
-  if (ext !== 'pdf') {
+  const supportedFormats = ['pdf', 'epub', 'mobi', 'azw3', 'azw']
+  if (!supportedFormats.includes(ext)) {
     return
   }
 
@@ -283,7 +284,7 @@ const handleFileChange = (file: UploadFile) => {
   }
   uploadFiles.value.push(fileItem)
 
-  // 如果是PDF，自动提取封面预览
+  // 自动提取封面预览（支持PDF、EPUB、MOBI、AZW3格式）
   extractCoverPreview(file.name, rawFile)
 }
 

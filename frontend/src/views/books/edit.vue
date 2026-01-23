@@ -409,7 +409,7 @@ const uploadCover = async (options: { file: File }) => {
   }
 }
 
-// 从PDF提取封面
+// 从电子书提取封面（支持PDF、EPUB、MOBI、AZW3格式）
 const handleExtractCover = async () => {
   if (!isEdit.value) return
 

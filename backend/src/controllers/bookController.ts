@@ -6,6 +6,7 @@ import { config } from '../config/index.js';
 import { success, error, paginated } from '../utils/response.js';
 import type { AuthRequest, BookStatus } from '../types/index.js';
 import { extractPdfCover } from '../utils/pdfCover.js';
+import { extractCoverToBase64, extractCoverToFile } from '../utils/coverExtractor.js';
 
 export const bookController = {
   // 获取书籍列表
@@ -235,12 +236,16 @@ export const bookController = {
           }
         }
 
-        // 如果前端没有提取封面且是PDF文件，尝试后端提取
-        if (!coverPath && ext === 'pdf') {
-          console.log('[import] No preview cover, extracting from PDF...');
+        // 如果前端没有提取封面，尝试后端提取
+        if (!coverPath) {
+          console.log('[import] No preview cover, extracting from file...');
           try {
             const fullFilePath = path.join(config.upload.dir, filePath);
-            coverPath = await extractPdfCover(fullFilePath);
+            if (ext === 'pdf') {
+              coverPath = await extractPdfCover(fullFilePath);
+            } else if (['epub', 'mobi', 'azw3', 'azw'].includes(ext)) {
+              coverPath = await extractCoverToFile(fullFilePath);
+            }
           } catch (coverErr) {
             console.warn(`[import] Failed to extract cover for ${originalname}:`, coverErr);
           }
@@ -313,7 +318,7 @@ export const bookController = {
     success(res, { cover_path: `/uploads/${coverPath}` });
   },
 
-  // 预览PDF封面（上传临时文件并提取封面返回base64）
+  // 预览电子书封面（上传临时文件并提取封面返回base64）
   async previewCover(req: Request, res: Response): Promise<void> {
     console.log('previewCover called');
     const file = req.file;
@@ -321,51 +326,58 @@ export const bookController = {
 
     if (!file) {
       console.log('No file uploaded');
-      error(res, '请上传PDF文件');
+      error(res, '请上传电子书文件');
       return;
     }
 
-    // 检查是否是PDF
     const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== '.pdf') {
-      // 删除临时文件
+    const supportedFormats = ['.pdf', '.epub', '.mobi', '.azw3', '.azw'];
+
+    if (!supportedFormats.includes(ext)) {
       fs.unlinkSync(file.path);
-      error(res, '只有PDF文件支持提取封面');
+      error(res, '不支持的文件格式');
       return;
     }
 
     try {
-      console.log('Importing mupdf...');
-      // 动态导入 mupdf
-      const mupdf = await import('mupdf');
-      console.log('mupdf imported successfully');
+      let base64Cover: string | null = null;
 
-      // 读取PDF
-      console.log('Reading PDF from:', file.path);
-      const pdfData = fs.readFileSync(file.path);
-      console.log('PDF size:', pdfData.length, 'bytes');
-      const doc = mupdf.Document.openDocument(pdfData, 'application/pdf');
-      console.log('Document opened, pages:', doc.countPages());
+      if (ext === '.pdf') {
+        // PDF使用mupdf提取
+        console.log('Extracting PDF cover...');
+        const mupdf = await import('mupdf');
 
-      if (doc.countPages() === 0) {
-        fs.unlinkSync(file.path);
-        error(res, 'PDF文件没有页面');
-        return;
+        const pdfData = fs.readFileSync(file.path);
+        const doc = mupdf.Document.openDocument(pdfData, 'application/pdf');
+
+        if (doc.countPages() === 0) {
+          fs.unlinkSync(file.path);
+          error(res, 'PDF文件没有页面');
+          return;
+        }
+
+        const page = doc.loadPage(0);
+        const scale = 0.5;
+        const matrix = mupdf.Matrix.scale(scale, scale);
+        const pixmap = page.toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, false, true);
+        const pngData = pixmap.asPNG();
+
+        const base64 = Buffer.from(pngData).toString('base64');
+        base64Cover = `data:image/png;base64,${base64}`;
+      } else {
+        // EPUB/MOBI/AZW3使用coverExtractor
+        console.log('Extracting ebook cover for format:', ext);
+        base64Cover = await extractCoverToBase64(file.path);
       }
-
-      // 提取第一页
-      const page = doc.loadPage(0);
-      const scale = 0.5; // 预览用较小的缩放
-      const matrix = mupdf.Matrix.scale(scale, scale);
-      const pixmap = page.toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, false, true);
-      const pngData = pixmap.asPNG();
 
       // 删除临时文件
       fs.unlinkSync(file.path);
 
-      // 返回base64
-      const base64 = Buffer.from(pngData).toString('base64');
-      success(res, { cover: `data:image/png;base64,${base64}` });
+      if (base64Cover) {
+        success(res, { cover: base64Cover });
+      } else {
+        error(res, '无法提取封面');
+      }
     } catch (err: any) {
       // 删除临时文件
       if (fs.existsSync(file.path)) {
@@ -376,7 +388,7 @@ export const bookController = {
     }
   },
 
-  // 从PDF提取封面（已存在的书籍）
+  // 从电子书提取封面（已存在的书籍）
   async extractCover(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
 
@@ -386,9 +398,11 @@ export const bookController = {
       return;
     }
 
-    // 检查是否是 PDF 文件
-    if (book.format?.toLowerCase() !== 'pdf') {
-      error(res, '只有PDF文件支持提取封面');
+    const format = book.format?.toLowerCase();
+    const supportedFormats = ['pdf', 'epub', 'mobi', 'azw3', 'azw'];
+
+    if (!format || !supportedFormats.includes(format)) {
+      error(res, '不支持的文件格式');
       return;
     }
 
@@ -400,7 +414,14 @@ export const bookController = {
     }
 
     try {
-      const coverPath = await extractPdfCover(filePath);
+      let coverPath: string | null = null;
+
+      if (format === 'pdf') {
+        coverPath = await extractPdfCover(filePath);
+      } else {
+        coverPath = await extractCoverToFile(filePath);
+      }
+
       if (!coverPath) {
         error(res, '封面提取失败');
         return;
