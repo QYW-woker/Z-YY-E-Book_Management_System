@@ -231,18 +231,27 @@ const extractCoverPreview = async (filename: string, file: File) => {
   })
 
   try {
+    console.log('[extractCoverPreview] Starting cover extraction for:', filename)
+    console.log('[extractCoverPreview] File size:', file.size, 'bytes')
     const result = await Promise.race([
       booksApi.previewCover(file),
       timeoutPromise
     ])
+    console.log('[extractCoverPreview] API response:', result)
     // 重新查找索引（防止数组变化）
     const currentIndex = uploadFiles.value.findIndex(f => f.filename === filename)
     if (currentIndex !== -1 && result.cover) {
       uploadFiles.value[currentIndex].cover = result.cover
       uploadFiles.value[currentIndex].coverLoading = false
+      console.log('[extractCoverPreview] Cover set successfully for:', filename)
+    } else {
+      console.log('[extractCoverPreview] No cover in response or file not found')
+      if (currentIndex !== -1) {
+        uploadFiles.value[currentIndex].coverLoading = false
+      }
     }
   } catch (err: any) {
-    console.error('Failed to extract cover preview:', err)
+    console.error('[extractCoverPreview] Failed to extract cover preview:', err)
     const currentIndex = uploadFiles.value.findIndex(f => f.filename === filename)
     if (currentIndex !== -1) {
       uploadFiles.value[currentIndex].coverLoading = false

@@ -367,7 +367,15 @@ export const bookController = {
       } else {
         // EPUB/MOBI/AZW3使用coverExtractor
         console.log('Extracting ebook cover for format:', ext);
-        base64Cover = await extractCoverToBase64(file.path);
+        console.log('File path:', file.path);
+        console.log('File exists:', fs.existsSync(file.path));
+        console.log('File size:', fs.statSync(file.path).size);
+        try {
+          base64Cover = await extractCoverToBase64(file.path);
+          console.log('Cover extraction result:', base64Cover ? 'success' : 'no cover found');
+        } catch (extractErr) {
+          console.error('Cover extraction error:', extractErr);
+        }
       }
 
       // 删除临时文件
