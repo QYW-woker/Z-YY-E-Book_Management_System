@@ -465,4 +465,86 @@ export const bookController = {
     // 这里简化实现，实际需要打包成 ZIP
     error(res, '批量导出功能正在开发中');
   },
+
+  // 从豆瓣搜索书籍元数据
+  async searchDouban(req: Request, res: Response): Promise<void> {
+    const { title } = req.query;
+
+    if (!title || typeof title !== 'string') {
+      error(res, '请提供书名');
+      return;
+    }
+
+    try {
+      const searchUrl = `https://book.douban.com/j/subject_suggest?q=${encodeURIComponent(title)}`;
+
+      const response = await fetch(searchUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
+          'Referer': 'https://book.douban.com/',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Douban API error: ${response.status}`);
+      }
+
+      const suggestions = await response.json() as Array<{
+        title: string;
+        author_name: string;
+        year: string;
+        pic: string;
+        id: string;
+      }>;
+
+      // 获取前5条结果的详细信息
+      const results = [];
+      for (const item of suggestions.slice(0, 5)) {
+        try {
+          const detailUrl = `https://book.douban.com/subject/${item.id}/`;
+          const detailResponse = await fetch(detailUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept': 'text/html',
+              'Referer': 'https://book.douban.com/',
+            },
+          });
+
+          if (!detailResponse.ok) continue;
+
+          const html = await detailResponse.text();
+
+          // 解析详情页
+          const publisherMatch = html.match(/<span class="pl">出版社:<\/span>\s*([^<]+)/);
+          const pubdateMatch = html.match(/<span class="pl">出版年:<\/span>\s*([^<]+)/);
+          const isbnMatch = html.match(/<span class="pl">ISBN:<\/span>\s*([^<]+)/);
+          const descMatch = html.match(/<div class="intro">\s*<p>([^<]+)<\/p>/);
+          const authorMatch = html.match(/<span class="pl">\s*作者<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>/);
+
+          results.push({
+            title: item.title || '',
+            author: authorMatch ? authorMatch[1].trim() : (item.author_name || ''),
+            publisher: publisherMatch ? publisherMatch[1].trim() : '',
+            publish_date: pubdateMatch ? pubdateMatch[1].trim() : (item.year || ''),
+            isbn: isbnMatch ? isbnMatch[1].trim() : '',
+            language: 'zh-CN',
+            description: descMatch ? descMatch[1].trim() : '',
+            cover: item.pic || '',
+          });
+
+          // 添加延迟避免请求过快
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (e) {
+          // 单条记录获取失败，跳过
+          console.warn('Failed to fetch detail for', item.id, e);
+        }
+      }
+
+      success(res, results);
+    } catch (err: any) {
+      console.error('Douban search error:', err);
+      error(res, err.message || '豆瓣搜索失败');
+    }
+  },
 };

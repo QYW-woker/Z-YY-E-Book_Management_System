@@ -121,4 +121,20 @@ export const booksApi = {
   batchUpdateStatus(ids: string[], status: 'draft' | 'published' | 'archived'): Promise<void> {
     return request.post('/admin/books/batch-status', { book_ids: ids, status })
   },
+
+  /**
+   * 从豆瓣搜索书籍元数据
+   */
+  searchDouban(title: string): Promise<Array<{
+    title: string
+    author: string
+    publisher: string
+    publish_date: string
+    isbn: string
+    language: string
+    description: string
+    cover: string
+  }>> {
+    return request.get('/admin/books/search-douban', { params: { title } })
+  },
 }

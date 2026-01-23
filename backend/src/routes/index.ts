@@ -32,6 +32,9 @@ router.post('/admin/books/batch-delete', bookController.batchDelete);
 router.post('/admin/books/batch-update', bookController.batchUpdate);
 router.patch('/admin/books/:id/status', bookController.updateStatus);
 router.post('/admin/books/batch-status', bookController.batchUpdateStatus);
+router.get('/admin/books/search-douban', (req, res, next) => {
+  bookController.searchDouban(req, res).catch(next);
+});
 router.post('/admin/books/preview-cover', uploadBooks.single('file'), (req, res, next) => {
   bookController.previewCover(req, res).catch(next);
 });

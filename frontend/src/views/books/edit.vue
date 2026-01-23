@@ -15,6 +15,14 @@
         <!-- 左侧表单 -->
         <el-col :xs="24" :lg="16">
           <div class="card">
+            <!-- 一键抓取按钮 -->
+            <div class="fetch-header">
+              <el-button type="primary" :loading="fetching" @click="handleFetchMetadata">
+                <el-icon><MagicStick /></el-icon>一键抓取
+              </el-button>
+              <span class="fetch-tip">根据书名从豆瓣自动获取元数据</span>
+            </div>
+            <el-divider />
             <el-form
               ref="formRef"
               :model="form"
@@ -207,6 +215,43 @@
         </el-button>
       </div>
     </div>
+
+    <!-- 豆瓣搜索结果选择弹窗 -->
+    <el-dialog v-model="showSearchResults" title="选择书籍信息" width="700px">
+      <div class="search-results">
+        <p class="result-tip">根据"{{ form.title }}"搜索到以下结果，请选择一条：</p>
+        <div class="result-list">
+          <div
+            v-for="(item, index) in searchResults"
+            :key="index"
+            class="result-item"
+            :class="{ selected: selectedResultIndex === index }"
+            @click="selectedResultIndex = index"
+          >
+            <img :src="item.cover || '/images/default-cover.png'" class="result-cover" />
+            <div class="result-info">
+              <div class="result-title">{{ item.title }}</div>
+              <div class="result-meta">
+                <span v-if="item.author">作者：{{ item.author }}</span>
+                <span v-if="item.publisher">出版社：{{ item.publisher }}</span>
+              </div>
+              <div class="result-meta">
+                <span v-if="item.publish_date">出版日期：{{ item.publish_date }}</span>
+                <span v-if="item.isbn">ISBN：{{ item.isbn }}</span>
+              </div>
+              <div v-if="item.description" class="result-desc">{{ item.description }}</div>
+            </div>
+          </div>
+        </div>
+        <el-empty v-if="searchResults.length === 0" description="未找到相关书籍信息" />
+      </div>
+      <template #footer>
+        <el-button @click="showSearchResults = false">取消</el-button>
+        <el-button type="primary" :disabled="selectedResultIndex === -1" @click="applySearchResult">
+          确认选择
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -230,6 +275,22 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 const saving = ref(false)
 const extractingCover = ref(false)
+
+// 一键抓取相关
+interface SearchResultItem {
+  title: string
+  author: string
+  publisher: string
+  publish_date: string
+  isbn: string
+  language: string
+  description: string
+  cover: string
+}
+const fetching = ref(false)
+const showSearchResults = ref(false)
+const searchResults = ref<SearchResultItem[]>([])
+const selectedResultIndex = ref(-1)
 
 // 获取封面完整URL
 const getCoverUrl = (coverPath: string | undefined | null): string => {
@@ -361,6 +422,57 @@ const handleExtractCover = async () => {
     ElMessage.error(err.message || '封面提取失败')
   } finally {
     extractingCover.value = false
+  }
+}
+
+// 一键抓取元数据
+const handleFetchMetadata = async () => {
+  if (!form.title?.trim()) {
+    ElMessage.warning('请先输入书名')
+    return
+  }
+
+  fetching.value = true
+  searchResults.value = []
+  selectedResultIndex.value = -1
+
+  try {
+    const results = await booksApi.searchDouban(form.title.trim())
+
+    if (results.length === 0) {
+      ElMessage.warning('未找到相关书籍信息')
+    } else if (results.length === 1) {
+      // 只有一条结果，直接填充
+      applyResult(results[0])
+      ElMessage.success('已自动填充书籍信息')
+    } else {
+      // 多条结果，弹窗选择
+      searchResults.value = results
+      showSearchResults.value = true
+    }
+  } catch (err: any) {
+    ElMessage.error(err.message || '抓取失败，请稍后重试')
+  } finally {
+    fetching.value = false
+  }
+}
+
+// 应用搜索结果
+const applyResult = (result: SearchResultItem) => {
+  if (result.author) form.author = result.author
+  if (result.publisher) form.publisher = result.publisher
+  if (result.publish_date) form.publish_date = result.publish_date
+  if (result.isbn) form.isbn = result.isbn
+  if (result.language) form.language = result.language
+  if (result.description) form.description = result.description
+}
+
+// 确认选择搜索结果
+const applySearchResult = () => {
+  if (selectedResultIndex.value >= 0 && selectedResultIndex.value < searchResults.value.length) {
+    applyResult(searchResults.value[selectedResultIndex.value])
+    showSearchResults.value = false
+    ElMessage.success('已填充书籍信息')
   }
 }
 
@@ -504,6 +616,93 @@ onMounted(() => {
     justify-content: flex-end;
     gap: 12px;
     z-index: 10;
+  }
+
+  .fetch-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    .fetch-tip {
+      font-size: 13px;
+      color: #909399;
+    }
+  }
+}
+
+// 搜索结果弹窗样式
+.search-results {
+  .result-tip {
+    margin-bottom: 16px;
+    color: #606266;
+  }
+
+  .result-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .result-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #ebeef5;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: #409eff;
+      background: #f5f7fa;
+    }
+
+    &.selected {
+      border-color: #409eff;
+      background: #ecf5ff;
+    }
+
+    .result-cover {
+      width: 60px;
+      height: 85px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .result-info {
+      flex: 1;
+      min-width: 0;
+
+      .result-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #303133;
+        margin-bottom: 6px;
+      }
+
+      .result-meta {
+        font-size: 13px;
+        color: #909399;
+        margin-bottom: 4px;
+
+        span {
+          margin-right: 16px;
+        }
+      }
+
+      .result-desc {
+        font-size: 12px;
+        color: #909399;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-top: 6px;
+      }
+    }
   }
 }
 </style>
