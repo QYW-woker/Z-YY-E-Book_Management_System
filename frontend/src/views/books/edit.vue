@@ -457,11 +457,27 @@ const handleFetchMetadata = async () => {
   }
 }
 
+// 格式化豆瓣日期为标准格式 (YYYY-MM-DD)
+const formatDoubanDate = (dateStr: string): string => {
+  if (!dateStr) return ''
+  // 处理各种格式: "2020-2", "2020-02", "2020.2", "2020年2月", "2020"
+  const cleaned = dateStr.replace(/[年月.]/g, '-').replace(/-+$/, '')
+  const parts = cleaned.split('-').filter(p => p)
+
+  if (parts.length >= 1) {
+    const year = parts[0].padStart(4, '0')
+    const month = parts[1] ? parts[1].padStart(2, '0') : '01'
+    const day = parts[2] ? parts[2].padStart(2, '0') : '01'
+    return `${year}-${month}-${day}`
+  }
+  return ''
+}
+
 // 应用搜索结果
 const applyResult = (result: SearchResultItem) => {
   if (result.author) form.author = result.author
   if (result.publisher) form.publisher = result.publisher
-  if (result.publish_date) form.publish_date = result.publish_date
+  if (result.publish_date) form.publish_date = formatDoubanDate(result.publish_date)
   if (result.isbn) form.isbn = result.isbn
   if (result.language) form.language = result.language
   if (result.description) form.description = result.description
