@@ -150,6 +150,14 @@
           show-overflow-tooltip
         />
 
+        <el-table-column
+          v-if="isColumnVisible('isbn')"
+          prop="isbn"
+          label="ISBN"
+          width="140"
+          show-overflow-tooltip
+        />
+
         <el-table-column v-if="isColumnVisible('format')" prop="format" label="格式" width="80">
           <template #default="{ row }">
             <el-tag size="small" type="info">{{ row.format?.toUpperCase() }}</el-tag>
@@ -353,6 +361,7 @@ const columnConfig = ref<ColumnConfig[]>([
   { key: 'title', label: '书名', visible: true, width: 200, sortable: true },
   { key: 'author', label: '作者', visible: true, width: 120, sortable: true },
   { key: 'publisher', label: '出版社', visible: true, width: 120 },
+  { key: 'isbn', label: 'ISBN', visible: true, width: 140 },
   { key: 'format', label: '格式', visible: true, width: 80 },
   { key: 'file_size', label: '大小', visible: true, width: 100, sortable: true },
   { key: 'status', label: '状态', visible: true, width: 100 },
