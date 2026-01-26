@@ -65,5 +65,19 @@ function onTabChange(name: string | number) {
 .main-layout {
   min-height: 100vh;
   padding-bottom: 50px;
+  background-color: #f7f8fa;
+
+  // PC端适配
+  @media (min-width: 768px) {
+    min-height: calc(100vh - 40px);
+    position: relative;
+  }
+}
+
+// PC端 tabbar 样式调整
+:deep(.van-tabbar) {
+  @media (min-width: 768px) {
+    bottom: 20px !important;
+  }
 }
 </style>

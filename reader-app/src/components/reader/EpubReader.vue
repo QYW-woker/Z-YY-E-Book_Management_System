@@ -445,6 +445,10 @@ watch(() => props.url, () => {
   height: 100vh;
   overflow: hidden;
   background-color: #fff;
+
+  @media (min-width: 768px) {
+    height: calc(100vh - 40px);
+  }
 }
 
 .reader-container {

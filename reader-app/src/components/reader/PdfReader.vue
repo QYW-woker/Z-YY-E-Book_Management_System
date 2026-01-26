@@ -79,6 +79,10 @@ function onLoaded() {
   height: 100vh;
   overflow: hidden;
   background-color: #525659;
+
+  @media (min-width: 768px) {
+    height: calc(100vh - 40px);
+  }
 }
 
 .pdf-iframe {
