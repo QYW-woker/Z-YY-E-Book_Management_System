@@ -416,7 +416,7 @@ onMounted(() => {
     inset: 0;
     display: flex;
     align-items: flex-end;
-    justify-content: space-between;
+    justify-content: flex-start;
 
     @media (max-width: 767px) {
       padding: var(--ios-spacing-md);
@@ -426,6 +426,8 @@ onMounted(() => {
     @media (min-width: 768px) {
       padding: var(--md-spacing-lg) var(--md-spacing-xl);
       flex-direction: row;
+      // PC 端限制内容最大宽度
+      max-width: 800px;
     }
   }
 
@@ -443,6 +445,7 @@ onMounted(() => {
 
     @media (min-width: 768px) {
       padding-left: var(--md-spacing-xl);
+      max-width: 500px;
     }
   }
 
