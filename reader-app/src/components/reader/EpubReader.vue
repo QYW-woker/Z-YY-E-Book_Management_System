@@ -5,7 +5,14 @@
 
     <!-- 加载中 -->
     <div v-if="loading" class="loading-overlay">
-      <van-loading size="40" vertical>加载中...</van-loading>
+      <van-loading size="40" vertical>{{ loadingText }}</van-loading>
+    </div>
+
+    <!-- 加载错误 -->
+    <div v-if="errorMsg" class="error-overlay">
+      <van-empty image="error" :description="errorMsg">
+        <van-button type="primary" size="small" @click="initReader">重试</van-button>
+      </van-empty>
     </div>
 
     <!-- 顶部工具栏 -->
@@ -166,6 +173,8 @@ const emit = defineEmits<{
 
 const readerRef = ref<HTMLElement | null>(null);
 const loading = ref(true);
+const loadingText = ref('正在加载...');
+const errorMsg = ref('');
 const showToolbar = ref(true);
 const showToc = ref(false);
 const showSettings = ref(false);
@@ -216,9 +225,13 @@ async function initReader() {
 
   try {
     loading.value = true;
+    errorMsg.value = '';
+    loadingText.value = '正在加载书籍...';
 
+    console.log('开始加载 EPUB:', props.url);
     book = ePub(props.url);
 
+    loadingText.value = '正在渲染...';
     rendition = book.renderTo(readerRef.value, {
       width: '100%',
       height: '100%',
@@ -227,12 +240,16 @@ async function initReader() {
     });
 
     // 获取书籍元数据
+    loadingText.value = '正在解析元数据...';
     const metadata = await book.loaded.metadata;
+    console.log('元数据加载完成:', metadata);
     bookTitle.value = props.title || metadata.title || '未知书名';
 
     // 获取目录
+    loadingText.value = '正在加载目录...';
     const navigation = await book.loaded.navigation;
     tocList.value = flattenToc(navigation.toc);
+    console.log('目录加载完成, 章节数:', tocList.value.length);
 
     // 应用初始样式
     applyStyles();
@@ -260,13 +277,10 @@ async function initReader() {
       }
     });
 
-    // 生成位置信息
-    await book.locations.generate(1024);
-
-    // 恢复阅读进度
+    // 先显示内容，再生成位置信息
+    loadingText.value = '正在显示内容...';
     if (props.initialProgress && props.initialProgress > 0) {
-      const cfi = book.locations.cfiFromPercentage(props.initialProgress / 100);
-      await rendition.display(cfi);
+      await rendition.display();
     } else {
       await rendition.display();
     }
@@ -274,8 +288,23 @@ async function initReader() {
     loading.value = false;
     emit('loaded');
     startHideTimer();
-  } catch (error) {
+    console.log('EPUB 加载完成');
+
+    // 后台生成位置信息（不阻塞显示）
+    book.locations.generate(1024).then(() => {
+      console.log('位置信息生成完成');
+      // 恢复阅读进度
+      if (props.initialProgress && props.initialProgress > 0 && book) {
+        const cfi = book.locations.cfiFromPercentage(props.initialProgress / 100);
+        rendition?.display(cfi);
+      }
+    }).catch(err => {
+      console.warn('生成位置信息失败:', err);
+    });
+
+  } catch (error: any) {
     console.error('初始化EPUB阅读器失败:', error);
+    errorMsg.value = error?.message || '加载失败，请重试';
     loading.value = false;
   }
 }
@@ -448,6 +477,19 @@ watch(() => props.url, () => {
   align-items: center;
   justify-content: center;
   background-color: rgba(255, 255, 255, 0.9);
+  z-index: 100;
+}
+
+.error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
   z-index: 100;
 }
 
