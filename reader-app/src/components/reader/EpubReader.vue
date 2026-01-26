@@ -1,7 +1,7 @@
 <template>
   <div class="epub-reader">
     <!-- 阅读区域 -->
-    <div ref="readerRef" class="reader-container" @click="toggleToolbar"></div>
+    <div ref="readerRef" class="reader-container"></div>
 
     <!-- 加载中 -->
     <div v-if="loading" class="loading-overlay">
@@ -16,8 +16,7 @@
     </div>
 
     <!-- 顶部工具栏 -->
-    <transition name="slide-down">
-      <div v-show="showToolbar" class="toolbar top-toolbar">
+    <div class="toolbar top-toolbar">
         <van-nav-bar
           :title="bookTitle || '阅读'"
           left-arrow
@@ -28,12 +27,10 @@
             <van-icon name="down" size="20" @click="$emit('download')" />
           </template>
         </van-nav-bar>
-      </div>
-    </transition>
+    </div>
 
     <!-- 底部工具栏 -->
-    <transition name="slide-up">
-      <div v-show="showToolbar" class="toolbar bottom-toolbar">
+    <div class="toolbar bottom-toolbar">
         <!-- 进度条 -->
         <div class="progress-section">
           <span class="progress-text">{{ currentChapter }}</span>
@@ -61,8 +58,7 @@
             <span>下一页</span>
           </div>
         </div>
-      </div>
-    </transition>
+    </div>
 
     <!-- 目录弹出层 -->
     <van-popup
@@ -175,7 +171,7 @@ const readerRef = ref<HTMLElement | null>(null);
 const loading = ref(true);
 const loadingText = ref('正在加载...');
 const errorMsg = ref('');
-const showToolbar = ref(true);
+const showToolbar = ref(true); // 工具栏常驻显示
 const showToc = ref(false);
 const showSettings = ref(false);
 
@@ -199,25 +195,6 @@ const themes: Theme[] = [
 
 let book: Book | null = null;
 let rendition: Rendition | null = null;
-let hideToolbarTimer: number | null = null;
-
-// 切换工具栏显示
-function toggleToolbar() {
-  showToolbar.value = !showToolbar.value;
-  if (showToolbar.value) {
-    startHideTimer();
-  }
-}
-
-// 开始隐藏计时器
-function startHideTimer() {
-  if (hideToolbarTimer) {
-    clearTimeout(hideToolbarTimer);
-  }
-  hideToolbarTimer = window.setTimeout(() => {
-    showToolbar.value = false;
-  }, 5000);
-}
 
 // 初始化阅读器
 async function initReader() {
@@ -299,7 +276,6 @@ async function initReader() {
 
     loading.value = false;
     emit('loaded');
-    startHideTimer();
     console.log('EPUB 加载完成');
 
     // 后台生成位置信息（不阻塞显示）
@@ -447,9 +423,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  if (hideToolbarTimer) {
-    clearTimeout(hideToolbarTimer);
-  }
   if (book) {
     book.destroy();
   }
@@ -668,26 +641,5 @@ watch(() => props.url, () => {
       }
     }
   }
-}
-
-// 过渡动画
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-down-enter-from,
-.slide-down-leave-to {
-  transform: translateY(-100%);
-}
-
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
 }
 </style>
