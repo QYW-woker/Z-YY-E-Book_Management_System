@@ -17,7 +17,8 @@
           @click-left="$emit('back')"
         >
           <template #right>
-            <van-icon name="bars" size="20" @click="showToc = true" />
+            <van-icon name="bars" size="20" style="margin-right: 16px" @click="showToc = true" />
+            <van-icon name="down" size="20" @click="$emit('download')" />
           </template>
         </van-nav-bar>
       </div>
@@ -152,14 +153,15 @@ interface Theme {
 
 const props = defineProps<{
   url: string;
-  bookId: string;
+  title?: string;
   initialProgress?: number;
 }>();
 
 const emit = defineEmits<{
   (e: 'back'): void;
-  (e: 'progress', progress: number, currentPage: number, totalPages: number): void;
+  (e: 'download'): void;
   (e: 'loaded'): void;
+  (e: 'progress-change', data: { progress: number; cfi: string }): void;
 }>();
 
 const readerRef = ref<HTMLElement | null>(null);
@@ -226,7 +228,7 @@ async function initReader() {
 
     // 获取书籍元数据
     const metadata = await book.loaded.metadata;
-    bookTitle.value = metadata.title || '未知书名';
+    bookTitle.value = props.title || metadata.title || '未知书名';
 
     // 获取目录
     const navigation = await book.loaded.navigation;
@@ -251,7 +253,10 @@ async function initReader() {
         }
 
         // 发送进度更新
-        emit('progress', progress.value, location.start.index || 0, book!.locations.length());
+        emit('progress-change', {
+          progress: percentage,
+          cfi: location.start.cfi,
+        });
       }
     });
 
