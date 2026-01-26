@@ -265,10 +265,10 @@ function onNavClick(name: string) {
       font-size: 24px;
       margin-bottom: 2px;
     }
+  }
 
-    &--active {
-      color: var(--ios-blue) !important;
-    }
+  :deep(.van-tabbar-item--active) {
+    color: var(--ios-blue) !important;
   }
 
   @media (min-width: 768px) {
