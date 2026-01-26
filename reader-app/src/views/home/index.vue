@@ -24,44 +24,161 @@
       />
     </div>
 
-    <!-- PC端顶部搜索栏 - Material Design App Bar -->
-    <div class="pc-header pc-only">
-      <div class="search-container">
-        <van-search
-          v-model="searchValue"
-          placeholder="搜索书籍、作者..."
-          shape="round"
-          readonly
-          @click="goSearch"
-        />
-      </div>
-      <div class="header-actions">
-        <div class="user-profile" @click="goUser">
-          <van-image
-            v-if="authStore.user?.avatar"
-            :src="authStore.user.avatar"
-            round
-            width="40"
-            height="40"
+    <!-- PC端内容容器 -->
+    <div class="pc-container pc-only">
+      <!-- PC端顶部搜索栏 - Material Design App Bar -->
+      <div class="pc-header">
+        <div class="search-container">
+          <van-search
+            v-model="searchValue"
+            placeholder="搜索书籍、作者..."
+            shape="round"
+            readonly
+            @click="goSearch"
           />
-          <van-icon v-else name="user-circle-o" size="40" color="#9e9e9e" />
+        </div>
+        <div class="header-actions">
+          <div class="user-profile" @click="goUser">
+            <van-image
+              v-if="authStore.user?.avatar"
+              :src="authStore.user.avatar"
+              round
+              width="40"
+              height="40"
+            />
+            <van-icon v-else name="user-circle-o" size="40" color="#9e9e9e" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 轮播图 - PC端 -->
+      <van-swipe class="banner" :autoplay="4000" indicator-color="var(--md-primary)">
+        <van-swipe-item v-for="book in recommendedBooks" :key="book.book_id" @click="goBookDetail(book.book_id)">
+          <div class="banner-item">
+            <div
+              class="banner-bg"
+              :style="{ backgroundImage: `url(${getBookCover(book)})` }"
+            ></div>
+            <div class="banner-overlay"></div>
+            <div class="banner-content">
+              <div class="banner-cover">
+                <van-image
+                  :src="getBookCover(book)"
+                  fit="contain"
+                  width="100%"
+                  height="100%"
+                >
+                  <template #error>
+                    <div class="default-cover-banner">{{ book.title.slice(0, 2) }}</div>
+                  </template>
+                </van-image>
+              </div>
+              <div class="banner-info">
+                <div class="banner-title">{{ book.title }}</div>
+                <div class="banner-author">{{ book.author || '未知作者' }}</div>
+              </div>
+            </div>
+          </div>
+        </van-swipe-item>
+        <van-swipe-item v-if="recommendedBooks.length === 0">
+          <div class="banner-empty">暂无推荐</div>
+        </van-swipe-item>
+      </van-swipe>
+
+      <!-- 分类入口 - PC端 -->
+      <div class="section">
+        <div class="section-header">
+          <span class="title">分类</span>
+          <span class="more" @click="router.push('/category')">查看全部</span>
+        </div>
+        <van-grid class="category-grid" :column-num="8" :border="false">
+          <van-grid-item
+            v-for="category in topCategories"
+            :key="category.id"
+            :text="category.name"
+            icon="label-o"
+            @click="goCategoryDetail(category.id)"
+          />
+        </van-grid>
+      </div>
+
+      <!-- PC端两列布局：最新上架 + 热门下载 -->
+      <div class="pc-two-columns">
+        <!-- 左列：最新上架 -->
+        <div class="section pc-column">
+          <div class="section-header">
+            <span class="title">最新上架</span>
+            <span class="more" @click="router.push('/books/newest')">更多</span>
+          </div>
+          <div class="book-grid-pc">
+            <div
+              v-for="book in newestBooks"
+              :key="book.book_id"
+              class="book-card"
+              @click="goBookDetail(book.book_id)"
+            >
+              <van-image
+                class="book-cover"
+                :src="getBookCover(book)"
+                fit="cover"
+              >
+                <template #error>
+                  <div class="default-cover">{{ book.title.slice(0, 4) }}</div>
+                </template>
+              </van-image>
+              <div class="book-title ellipsis-2">{{ book.title }}</div>
+              <div class="book-author ellipsis">{{ book.author || '未知作者' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右列：热门下载 -->
+        <div class="section pc-column">
+          <div class="section-header">
+            <span class="title">热门下载</span>
+            <span class="more" @click="router.push('/books/hot')">更多</span>
+          </div>
+          <div class="hot-list-pc">
+            <div
+              v-for="(book, index) in hotBooks"
+              :key="book.book_id"
+              class="hot-item"
+              @click="goBookDetail(book.book_id)"
+            >
+              <span class="rank" :class="{ top: index < 3 }">{{ index + 1 }}</span>
+              <van-image
+                class="book-cover-small"
+                :src="getBookCover(book)"
+                fit="cover"
+              >
+                <template #error>
+                  <div class="default-cover book-cover-small">{{ book.title.slice(0, 2) }}</div>
+                </template>
+              </van-image>
+              <div class="book-info">
+                <div class="book-title ellipsis">{{ book.title }}</div>
+                <div class="book-author ellipsis">{{ book.author || '未知作者' }}</div>
+                <div class="book-stats">
+                  <span><van-icon name="eye-o" /> {{ book.view_count }}</span>
+                  <span><van-icon name="down" /> {{ book.download_count }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 轮播图 -->
-    <van-swipe class="banner" :autoplay="4000" indicator-color="var(--ios-blue)">
+    <!-- 轮播图 - 移动端 -->
+    <van-swipe class="banner mobile-only" :autoplay="4000" indicator-color="var(--ios-blue)">
       <van-swipe-item v-for="book in recommendedBooks" :key="book.book_id" @click="goBookDetail(book.book_id)">
         <div class="banner-item">
-          <!-- 底层：模糊背景 -->
           <div
             class="banner-bg"
             :style="{ backgroundImage: `url(${getBookCover(book)})` }"
           ></div>
           <div class="banner-overlay"></div>
-          <!-- 上层：内容区域 -->
           <div class="banner-content">
-            <!-- 原始比例封面（左侧） -->
             <div class="banner-cover">
               <van-image
                 :src="getBookCover(book)"
@@ -74,7 +191,6 @@
                 </template>
               </van-image>
             </div>
-            <!-- 书名和作者（右侧） -->
             <div class="banner-info">
               <div class="banner-title">{{ book.title }}</div>
               <div class="banner-author">{{ book.author || '未知作者' }}</div>
@@ -87,8 +203,8 @@
       </van-swipe-item>
     </van-swipe>
 
-    <!-- 分类入口 -->
-    <div class="section">
+    <!-- 分类入口 - 移动端 -->
+    <div class="section mobile-only">
       <div class="section-header">
         <span class="title">分类</span>
         <span class="more" @click="router.push('/category')">查看全部</span>
@@ -104,8 +220,8 @@
       </van-grid>
     </div>
 
-    <!-- 最新上架 -->
-    <div class="section">
+    <!-- 最新上架 - 移动端 -->
+    <div class="section mobile-only">
       <div class="section-header">
         <span class="title">最新上架</span>
         <span class="more" @click="router.push('/books/newest')">更多</span>
@@ -132,8 +248,8 @@
       </div>
     </div>
 
-    <!-- 热门下载 -->
-    <div class="section">
+    <!-- 热门下载 - 移动端 -->
+    <div class="section mobile-only">
       <div class="section-header">
         <span class="title">热门下载</span>
         <span class="more" @click="router.push('/books/hot')">更多</span>
@@ -262,8 +378,16 @@ onMounted(() => {
   // Material Design background
   @media (min-width: 768px) {
     background-color: var(--md-background);
-    padding: var(--md-spacing-lg) var(--md-spacing-xl);
   }
+}
+
+// ============================================
+// PC Container - Max Width Constraint
+// ============================================
+.pc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--md-spacing-lg) var(--md-spacing-xl);
 }
 
 // ============================================
@@ -328,7 +452,7 @@ onMounted(() => {
 
   .search-container {
     flex: 1;
-    max-width: 600px;
+    max-width: 500px;
 
     :deep(.van-search) {
       padding: 0;
@@ -364,10 +488,10 @@ onMounted(() => {
 }
 
 // ============================================
-// Banner - iOS Carousel Style
+// Banner - iOS Carousel Style (Mobile) / Material Design (PC)
 // ============================================
 .banner {
-  // iOS style
+  // iOS style (Mobile)
   @media (max-width: 767px) {
     height: 200px;
     margin: var(--ios-spacing-md);
@@ -375,12 +499,13 @@ onMounted(() => {
     overflow: hidden;
   }
 
-  // Material Design style
-  @media (min-width: 768px) {
-    height: 320px;
+  // Material Design style (PC - inside container)
+  &:not(.mobile-only) {
+    height: 280px;
     border-radius: var(--md-radius-xl);
     overflow: hidden;
     box-shadow: var(--md-elevation-2);
+    margin-bottom: var(--md-spacing-lg);
   }
 
   .banner-item {
@@ -392,7 +517,7 @@ onMounted(() => {
   // 底层模糊背景
   .banner-bg {
     position: absolute;
-    inset: -20px; // 扩展边缘避免模糊边缘出现空白
+    inset: -20px;
     background-size: cover;
     background-position: center;
     filter: blur(20px);
@@ -416,36 +541,27 @@ onMounted(() => {
     inset: 0;
     display: flex;
     align-items: flex-end;
-    justify-content: flex-start;
-
-    @media (max-width: 767px) {
-      padding: var(--ios-spacing-md);
-      flex-direction: row;
-    }
+    justify-content: center;
+    padding: var(--ios-spacing-md);
 
     @media (min-width: 768px) {
       padding: var(--md-spacing-lg) var(--md-spacing-xl);
-      flex-direction: row;
-      // PC 端限制内容最大宽度
-      max-width: 800px;
+      justify-content: flex-start;
     }
   }
 
-  // 文字信息区（右侧）
+  // 文字信息区
   .banner-info {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-
-    @media (max-width: 767px) {
-      padding-left: var(--ios-spacing-md);
-    }
+    padding-left: var(--ios-spacing-md);
+    max-width: 400px;
 
     @media (min-width: 768px) {
-      padding-left: var(--md-spacing-xl);
-      max-width: 500px;
+      padding-left: var(--md-spacing-lg);
     }
   }
 
@@ -453,14 +569,11 @@ onMounted(() => {
     color: #fff;
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-
-    @media (max-width: 767px) {
-      font-size: 18px;
-      letter-spacing: -0.022em;
-    }
+    font-size: 18px;
+    letter-spacing: -0.022em;
 
     @media (min-width: 768px) {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 500;
       letter-spacing: 0;
     }
@@ -470,14 +583,11 @@ onMounted(() => {
     color: rgba(255, 255, 255, 0.85);
     margin-top: 4px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-
-    @media (max-width: 767px) {
-      font-size: 14px;
-    }
+    font-size: 14px;
 
     @media (min-width: 768px) {
-      font-size: 16px;
-      margin-top: 8px;
+      font-size: 15px;
+      margin-top: 6px;
     }
   }
 
@@ -487,15 +597,12 @@ onMounted(() => {
     border-radius: var(--ios-radius-sm);
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-
-    @media (max-width: 767px) {
-      width: 90px;
-      height: 126px; // 1:1.4 书籍比例
-    }
+    width: 90px;
+    height: 126px;
 
     @media (min-width: 768px) {
-      width: 160px;
-      height: 224px;
+      width: 140px;
+      height: 196px;
       border-radius: var(--md-radius-md);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
     }
@@ -547,7 +654,7 @@ onMounted(() => {
     margin-bottom: var(--ios-spacing-md);
 
     @media (min-width: 768px) {
-      margin-bottom: var(--md-spacing-lg);
+      margin-bottom: var(--md-spacing-md);
     }
 
     .title {
@@ -561,7 +668,7 @@ onMounted(() => {
 
       // Material Design style
       @media (min-width: 768px) {
-        font-size: var(--md-headline-6);
+        font-size: 18px;
         font-weight: 500;
         color: var(--md-on-surface);
         letter-spacing: 0.0125em;
@@ -583,7 +690,7 @@ onMounted(() => {
 
       // Material Design style
       @media (min-width: 768px) {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
         color: var(--md-primary);
         text-transform: uppercase;
@@ -620,17 +727,17 @@ onMounted(() => {
     }
   }
 
-  // Material Design style
+  // Material Design style (PC)
   @media (min-width: 768px) {
     background: var(--md-surface);
     border-radius: var(--md-radius-lg);
-    padding: var(--md-spacing-md);
+    padding: var(--md-spacing-sm);
     box-shadow: var(--md-elevation-1);
 
     :deep(.van-grid-item) {
       .van-grid-item__content {
-        padding: var(--md-spacing-md);
-        border-radius: var(--md-radius-md);
+        padding: var(--md-spacing-sm) var(--md-spacing-xs);
+        border-radius: var(--md-radius-sm);
         transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:hover {
@@ -640,17 +747,157 @@ onMounted(() => {
 
       .van-grid-item__icon {
         color: var(--md-primary);
+        font-size: 20px;
       }
 
       .van-grid-item__text {
         font-weight: 500;
+        font-size: 13px;
+        margin-top: 4px;
       }
     }
   }
 }
 
 // ============================================
-// Book Scroll - Horizontal on Mobile, Grid on PC
+// PC Two Column Layout
+// ============================================
+.pc-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--md-spacing-xl);
+  margin-top: var(--md-spacing-xl);
+
+  .pc-column {
+    margin-top: 0;
+  }
+}
+
+// ============================================
+// Book Grid - PC Only
+// ============================================
+.book-grid-pc {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--md-spacing-md);
+
+  .book-card {
+    background: var(--md-surface);
+    border-radius: var(--md-radius-md);
+    padding: var(--md-spacing-sm);
+    box-shadow: var(--md-elevation-1);
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--md-elevation-hover);
+    }
+
+    .book-cover {
+      width: 100%;
+      height: 160px;
+      border-radius: var(--md-radius-sm);
+      overflow: hidden;
+    }
+
+    .book-title {
+      margin-top: var(--md-spacing-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      line-height: 1.4;
+    }
+
+    .book-author {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--md-on-surface-medium);
+    }
+  }
+}
+
+// ============================================
+// Hot List - PC Only
+// ============================================
+.hot-list-pc {
+  background: var(--md-surface);
+  border-radius: var(--md-radius-lg);
+  box-shadow: var(--md-elevation-1);
+  overflow: hidden;
+
+  .hot-item {
+    display: flex;
+    align-items: center;
+    padding: var(--md-spacing-md);
+    cursor: pointer;
+    transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: rgba(25, 118, 210, 0.04);
+    }
+
+    .rank {
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--md-on-surface-medium);
+      margin-right: var(--md-spacing-md);
+      flex-shrink: 0;
+
+      &.top {
+        background: linear-gradient(135deg, #ff6034 0%, #ee0a24 100%);
+        color: #fff;
+        border-radius: 50%;
+      }
+    }
+
+    .book-cover-small {
+      width: 56px;
+      height: 78px;
+      border-radius: var(--md-radius-sm);
+      overflow: hidden;
+      margin-right: var(--md-spacing-md);
+      flex-shrink: 0;
+    }
+
+    .book-info {
+      flex: 1;
+      min-width: 0;
+
+      .book-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--md-on-surface);
+      }
+
+      .book-author {
+        margin-top: 2px;
+        font-size: 12px;
+        color: var(--md-on-surface-medium);
+      }
+
+      .book-stats {
+        display: flex;
+        gap: var(--md-spacing-md);
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--md-on-surface-disabled);
+      }
+    }
+  }
+}
+
+// ============================================
+// Book Scroll - Mobile Horizontal Scroll
 // ============================================
 .book-scroll {
   display: flex;
@@ -664,152 +911,67 @@ onMounted(() => {
     display: none;
   }
 
-  // Material Design Grid on PC
-  @media (min-width: 768px) {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: var(--md-spacing-lg);
-    overflow-x: visible;
-    padding-bottom: 0;
-    scroll-snap-type: none;
-  }
-
   .book-card {
     flex-shrink: 0;
     width: 110px;
     scroll-snap-align: start;
     cursor: pointer;
 
-    // iOS touch feedback
-    @media (max-width: 767px) {
-      &:active {
-        opacity: 0.7;
-        transform: scale(0.98);
-      }
-    }
-
-    // Material Design Card on PC
-    @media (min-width: 768px) {
-      width: auto;
-      background: var(--md-surface);
-      border-radius: var(--md-radius-lg);
-      padding: var(--md-spacing-md);
-      box-shadow: var(--md-elevation-1);
-      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--md-elevation-hover);
-      }
+    &:active {
+      opacity: 0.7;
+      transform: scale(0.98);
     }
 
     .book-cover {
+      width: 110px;
+      height: 154px;
       border-radius: var(--ios-radius-sm);
       overflow: hidden;
-
-      @media (max-width: 767px) {
-        width: 110px;
-        height: 154px;
-      }
-
-      @media (min-width: 768px) {
-        width: 100%;
-        height: 220px;
-        border-radius: var(--md-radius-md);
-      }
     }
 
     .book-title {
+      margin-top: var(--ios-spacing-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: #1C1C1E;
       line-height: 1.4;
-
-      @media (max-width: 767px) {
-        margin-top: var(--ios-spacing-sm);
-        font-size: 14px;
-        font-weight: 500;
-        color: #1C1C1E;
-      }
-
-      @media (min-width: 768px) {
-        margin-top: var(--md-spacing-md);
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--md-on-surface);
-      }
     }
 
     .book-author {
-      @media (max-width: 767px) {
-        margin-top: 2px;
-        font-size: 12px;
-        color: var(--ios-gray);
-      }
-
-      @media (min-width: 768px) {
-        margin-top: var(--md-spacing-xs);
-        font-size: 14px;
-        color: var(--md-on-surface-medium);
-      }
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--ios-gray);
     }
   }
 }
 
 // ============================================
-// Hot List
+// Hot List - Mobile
 // ============================================
 .hot-list {
   overflow: hidden;
-
-  // iOS style
-  @media (max-width: 767px) {
-    background: var(--ios-card-bg);
-    border-radius: var(--ios-radius-md);
-  }
-
-  // Material Design style
-  @media (min-width: 768px) {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--md-spacing-md);
-    background: transparent;
-  }
+  background: var(--ios-card-bg);
+  border-radius: var(--ios-radius-md);
 
   .hot-item {
     display: flex;
     align-items: center;
     cursor: pointer;
+    padding: var(--ios-spacing-md);
+    position: relative;
 
-    // iOS style
-    @media (max-width: 767px) {
-      padding: var(--ios-spacing-md);
-      position: relative;
-
-      &:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 64px;
-        right: 0;
-        height: 0.5px;
-        background: var(--ios-separator);
-      }
-
-      &:active {
-        background: var(--ios-gray-5);
-      }
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 64px;
+      right: 0;
+      height: 0.5px;
+      background: var(--ios-separator);
     }
 
-    // Material Design style
-    @media (min-width: 768px) {
-      background: var(--md-surface);
-      padding: var(--md-spacing-md);
-      border-radius: var(--md-radius-lg);
-      box-shadow: var(--md-elevation-1);
-      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &:hover {
-        box-shadow: var(--md-elevation-hover);
-        transform: translateY(-2px);
-      }
+    &:active {
+      background: var(--ios-gray-5);
     }
 
     .rank {
@@ -819,50 +981,20 @@ onMounted(() => {
       text-align: center;
       font-weight: 600;
       margin-right: var(--ios-spacing-md);
-
-      @media (max-width: 767px) {
-        font-size: 15px;
-        color: var(--ios-gray);
-      }
-
-      @media (min-width: 768px) {
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
-        font-size: 16px;
-        color: var(--md-on-surface-medium);
-        margin-right: var(--md-spacing-md);
-      }
+      font-size: 15px;
+      color: var(--ios-gray);
 
       &.top {
-        @media (max-width: 767px) {
-          color: var(--ios-red);
-        }
-
-        @media (min-width: 768px) {
-          background: linear-gradient(135deg, #ff6034 0%, #ee0a24 100%);
-          color: #fff;
-          border-radius: 50%;
-        }
+        color: var(--ios-red);
       }
     }
 
     .book-cover-small {
+      width: 50px;
+      height: 70px;
       border-radius: var(--ios-radius-sm);
       overflow: hidden;
       margin-right: var(--ios-spacing-md);
-
-      @media (max-width: 767px) {
-        width: 50px;
-        height: 70px;
-      }
-
-      @media (min-width: 768px) {
-        width: 70px;
-        height: 98px;
-        border-radius: var(--md-radius-sm);
-        margin-right: var(--md-spacing-md);
-      }
     }
 
     .book-info {
@@ -870,49 +1002,23 @@ onMounted(() => {
       min-width: 0;
 
       .book-title {
+        font-size: 15px;
         font-weight: 500;
-
-        @media (max-width: 767px) {
-          font-size: 15px;
-          color: #1C1C1E;
-        }
-
-        @media (min-width: 768px) {
-          font-size: 16px;
-          color: var(--md-on-surface);
-        }
+        color: #1C1C1E;
       }
 
       .book-author {
-        @media (max-width: 767px) {
-          margin-top: 2px;
-          font-size: 13px;
-          color: var(--ios-gray);
-        }
-
-        @media (min-width: 768px) {
-          margin-top: var(--md-spacing-xs);
-          font-size: 14px;
-          color: var(--md-on-surface-medium);
-        }
+        margin-top: 2px;
+        font-size: 13px;
+        color: var(--ios-gray);
       }
 
       .book-stats {
         display: flex;
         gap: var(--ios-spacing-md);
-
-        @media (max-width: 767px) {
-          margin-top: 4px;
-          font-size: 12px;
-          color: var(--ios-gray-2);
-        }
-
-        @media (min-width: 768px) {
-          margin-top: var(--md-spacing-sm);
-          font-size: 13px;
-          color: var(--md-on-surface-disabled);
-          gap: var(--md-spacing-md);
-        }
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--ios-gray-2);
       }
     }
   }
@@ -931,15 +1037,11 @@ onMounted(() => {
   color: #fff;
   text-align: center;
   padding: var(--ios-spacing-sm);
-
-  @media (max-width: 767px) {
-    font-size: 13px;
-    font-weight: 500;
-  }
+  font-size: 13px;
+  font-weight: 500;
 
   @media (min-width: 768px) {
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 14px;
   }
 }
 
