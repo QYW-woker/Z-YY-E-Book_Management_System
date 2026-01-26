@@ -22,6 +22,7 @@
           @click-left="$emit('back')"
         >
           <template #right>
+            <van-icon name="info-o" size="20" style="margin-right: 16px" @click="showTip = true" />
             <van-icon name="down" size="20" @click="$emit('download')" />
           </template>
         </van-nav-bar>
@@ -30,6 +31,23 @@
 
     <!-- 点击区域 -->
     <div class="click-area" @click="toggleToolbar"></div>
+
+    <!-- 提示弹窗 -->
+    <van-dialog
+      v-model:show="showTip"
+      title="阅读提示"
+      confirm-button-text="知道了"
+    >
+      <div class="tip-content">
+        <p>PDF 阅读器使用提示：</p>
+        <ul>
+          <li>点击左上角 <van-icon name="arrow-left" /> 返回上一页</li>
+          <li>点击右上角 <van-icon name="down" /> 下载文件</li>
+          <li>双指缩放可放大/缩小页面</li>
+          <li>点击 PDF 左侧边栏图标可查看目录</li>
+        </ul>
+      </div>
+    </van-dialog>
   </div>
 </template>
 
@@ -50,6 +68,7 @@ const emit = defineEmits<{
 const iframeRef = ref<HTMLIFrameElement | null>(null);
 const loading = ref(true);
 const showToolbar = ref(true);
+const showTip = ref(false);
 
 let hideToolbarTimer: number | null = null;
 
@@ -166,5 +185,33 @@ onUnmounted(() => {
 .slide-down-enter-from,
 .slide-down-leave-to {
   transform: translateY(-100%);
+}
+
+.tip-content {
+  padding: 16px;
+  font-size: 14px;
+  color: #666;
+
+  p {
+    margin-bottom: 12px;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .van-icon {
+        color: #1989fa;
+      }
+    }
+  }
 }
 </style>
