@@ -226,10 +226,22 @@ async function initReader() {
   try {
     loading.value = true;
     errorMsg.value = '';
-    loadingText.value = '正在加载书籍...';
+    loadingText.value = '正在下载书籍...';
 
     console.log('开始加载 EPUB:', props.url);
-    book = ePub(props.url);
+
+    // 先下载整个 EPUB 文件为 ArrayBuffer
+    const response = await fetch(props.url);
+    if (!response.ok) {
+      throw new Error(`下载失败: ${response.status} ${response.statusText}`);
+    }
+
+    loadingText.value = '正在解析书籍...';
+    const arrayBuffer = await response.arrayBuffer();
+    console.log('EPUB 文件下载完成, 大小:', arrayBuffer.byteLength);
+
+    // 使用 ArrayBuffer 创建 epub 实例
+    book = ePub(arrayBuffer);
 
     loadingText.value = '正在渲染...';
     rendition = book.renderTo(readerRef.value, {
