@@ -2,7 +2,7 @@
   <div class="reader-page">
     <!-- PDF 阅读器 -->
     <PdfReader
-      v-if="book?.format === 'pdf' && fileUrl"
+      v-if="bookFormat === 'pdf' && fileUrl"
       :url="fileUrl"
       :title="book?.title"
       @back="router.back()"
@@ -12,7 +12,7 @@
 
     <!-- EPUB 阅读器 -->
     <EpubReader
-      v-else-if="book?.format === 'epub' && fileUrl"
+      v-else-if="bookFormat === 'epub' && fileUrl"
       :url="fileUrl"
       :title="book?.title"
       :initial-progress="savedProgress"
@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { showToast } from 'vant';
 import { booksApi } from '@/api/books';
@@ -70,6 +70,9 @@ const loading = ref(true);
 const book = ref<Book | null>(null);
 const fileUrl = ref('');
 const savedProgress = ref(0);
+
+// 格式统一转小写进行比较
+const bookFormat = computed(() => book.value?.format?.toLowerCase() || '');
 
 // 支持在线阅读的格式
 const supportedFormats = ['pdf', 'epub'];
