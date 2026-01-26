@@ -439,6 +439,10 @@ watch(() => props.url, () => {
 </script>
 
 <style lang="scss" scoped>
+// ============================================
+// EPUB Reader - iOS (Mobile) + Material Design (PC)
+// ============================================
+
 .epub-reader {
   position: relative;
   width: 100%;
@@ -461,8 +465,19 @@ watch(() => props.url, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.9);
   z-index: 100;
+
+  // iOS style
+  @media (max-width: 767px) {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .error-overlay {
@@ -487,27 +502,105 @@ watch(() => props.url, () => {
 
 .top-toolbar {
   top: 0;
+
+  // iOS NavBar style
+  :deep(.van-nav-bar) {
+    @media (max-width: 767px) {
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+
+      &::after {
+        background-color: var(--ios-separator);
+      }
+
+      .van-nav-bar__title {
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      .van-nav-bar__right .van-icon {
+        color: var(--ios-blue);
+      }
+    }
+
+    @media (min-width: 768px) {
+      background: var(--md-surface);
+      box-shadow: var(--md-elevation-1);
+
+      .van-nav-bar__title {
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .van-nav-bar__right .van-icon {
+        color: var(--md-primary);
+        transition: color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:hover {
+          color: var(--md-primary-dark);
+        }
+      }
+    }
+  }
 }
 
 .bottom-toolbar {
   bottom: 0;
-  background-color: #fff;
-  padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+
+  // iOS style
+  @media (max-width: 767px) {
+    background: rgba(249, 249, 249, 0.94);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    padding: var(--ios-spacing-md);
+    padding-bottom: calc(var(--ios-spacing-md) + env(safe-area-inset-bottom));
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 0.5px;
+      background: var(--ios-separator);
+    }
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background: var(--md-surface);
+    padding: var(--md-spacing-md) var(--md-spacing-lg);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .progress-section {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--ios-spacing-md);
+  margin-bottom: var(--ios-spacing-md);
+
+  @media (min-width: 768px) {
+    gap: var(--md-spacing-md);
+    margin-bottom: var(--md-spacing-md);
+  }
 
   .progress-text {
-    font-size: 12px;
-    color: #969799;
     white-space: nowrap;
-    min-width: 40px;
+
+    @media (max-width: 767px) {
+      font-size: 13px;
+      color: var(--ios-gray);
+      min-width: 40px;
+    }
+
+    @media (min-width: 768px) {
+      font-size: 14px;
+      color: var(--md-on-surface-medium);
+      min-width: 50px;
+    }
 
     &:first-child {
       max-width: 100px;
@@ -529,115 +622,305 @@ watch(() => props.url, () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 16px;
-    color: #646566;
+    cursor: pointer;
 
-    .van-icon {
-      font-size: 20px;
-      margin-bottom: 4px;
+    // iOS style
+    @media (max-width: 767px) {
+      padding: var(--ios-spacing-sm) var(--ios-spacing-md);
+      color: var(--ios-blue);
+
+      &:active {
+        opacity: 0.5;
+      }
+
+      .van-icon {
+        font-size: 22px;
+        margin-bottom: 4px;
+      }
+
+      span {
+        font-size: 11px;
+      }
     }
 
-    span {
-      font-size: 12px;
+    // Material Design style
+    @media (min-width: 768px) {
+      padding: var(--md-spacing-sm) var(--md-spacing-lg);
+      color: var(--md-primary);
+      border-radius: var(--md-radius-md);
+      transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background-color: rgba(25, 118, 210, 0.08);
+      }
+
+      .van-icon {
+        font-size: 24px;
+        margin-bottom: 6px;
+      }
+
+      span {
+        font-size: 13px;
+        font-weight: 500;
+      }
     }
   }
 }
 
-// 目录面板
+// ============================================
+// TOC Panel
+// ============================================
 .toc-panel {
   height: 100%;
   display: flex;
   flex-direction: column;
 
+  // iOS style
+  @media (max-width: 767px) {
+    background: var(--ios-card-bg);
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background: var(--md-surface);
+  }
+
   .toc-header {
-    padding: 16px;
-    font-size: 16px;
-    font-weight: bold;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 0.5px solid var(--ios-separator);
+
+    @media (max-width: 767px) {
+      padding: var(--ios-spacing-md);
+      font-size: 17px;
+      font-weight: 600;
+      color: #1C1C1E;
+    }
+
+    @media (min-width: 768px) {
+      padding: var(--md-spacing-md) var(--md-spacing-lg);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
   }
 
   .toc-list {
     flex: 1;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .toc-item {
-    padding: 12px 16px;
-    font-size: 14px;
-    color: #323233;
-    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    position: relative;
 
-    &.active {
-      color: #1989fa;
-      background-color: #ecf5ff;
+    // iOS style
+    @media (max-width: 767px) {
+      padding: var(--ios-spacing-md);
+      font-size: 15px;
+      color: #1C1C1E;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: var(--ios-spacing-md);
+        right: 0;
+        height: 0.5px;
+        background: var(--ios-separator);
+      }
+
+      &:active {
+        background: var(--ios-gray-5);
+      }
+
+      &.active {
+        color: var(--ios-blue);
+        background: rgba(0, 122, 255, 0.08);
+      }
+    }
+
+    // Material Design style
+    @media (min-width: 768px) {
+      padding: var(--md-spacing-md) var(--md-spacing-lg);
+      font-size: 14px;
+      color: var(--md-on-surface);
+      transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+
+      &.active {
+        color: var(--md-primary);
+        background: rgba(25, 118, 210, 0.12);
+        font-weight: 500;
+      }
     }
   }
 }
 
-// 设置面板
+// ============================================
+// Settings Panel
+// ============================================
 .settings-panel {
-  padding: 16px;
+  // iOS style
+  @media (max-width: 767px) {
+    padding: var(--ios-spacing-md);
+    background: var(--ios-card-bg);
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    padding: var(--md-spacing-lg);
+    background: var(--md-surface);
+  }
 
   .settings-header {
-    font-size: 16px;
-    font-weight: bold;
     text-align: center;
-    margin-bottom: 20px;
+
+    @media (max-width: 767px) {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1C1C1E;
+      margin-bottom: var(--ios-spacing-lg);
+    }
+
+    @media (min-width: 768px) {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      margin-bottom: var(--md-spacing-lg);
+    }
   }
 
   .settings-item {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+
+    @media (max-width: 767px) {
+      margin-bottom: var(--ios-spacing-lg);
+    }
+
+    @media (min-width: 768px) {
+      margin-bottom: var(--md-spacing-lg);
+    }
 
     .label {
       width: 70px;
-      font-size: 14px;
-      color: #323233;
+
+      @media (max-width: 767px) {
+        font-size: 15px;
+        color: #1C1C1E;
+      }
+
+      @media (min-width: 768px) {
+        font-size: 14px;
+        color: var(--md-on-surface);
+        font-weight: 500;
+      }
     }
 
     .van-slider {
       flex: 1;
-      margin: 0 12px;
+      margin: 0 var(--ios-spacing-md);
+
+      @media (min-width: 768px) {
+        margin: 0 var(--md-spacing-md);
+      }
     }
 
     .value {
       width: 50px;
-      font-size: 12px;
-      color: #969799;
       text-align: right;
+
+      @media (max-width: 767px) {
+        font-size: 13px;
+        color: var(--ios-gray);
+      }
+
+      @media (min-width: 768px) {
+        font-size: 14px;
+        color: var(--md-on-surface-medium);
+      }
     }
   }
 
   .font-size-control {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--ios-spacing-md);
+
+    @media (min-width: 768px) {
+      gap: var(--md-spacing-md);
+    }
 
     .font-size-value {
       min-width: 50px;
       text-align: center;
-      font-size: 14px;
+
+      @media (max-width: 767px) {
+        font-size: 15px;
+        color: #1C1C1E;
+      }
+
+      @media (min-width: 768px) {
+        font-size: 16px;
+        color: var(--md-on-surface);
+        font-weight: 500;
+      }
     }
   }
 
   .theme-options {
     display: flex;
-    gap: 12px;
+    gap: var(--ios-spacing-md);
+
+    @media (min-width: 768px) {
+      gap: var(--md-spacing-md);
+    }
 
     .theme-option {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid transparent;
-      font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
 
-      &.active {
-        border-color: #1989fa;
+      @media (max-width: 767px) {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        font-size: 17px;
+
+        &:active {
+          transform: scale(0.95);
+        }
+
+        &.active {
+          border-color: var(--ios-blue);
+        }
+      }
+
+      @media (min-width: 768px) {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        font-size: 18px;
+        box-shadow: var(--md-elevation-1);
+
+        &:hover {
+          box-shadow: var(--md-elevation-2);
+        }
+
+        &.active {
+          border-color: var(--md-primary);
+          box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        }
       }
     }
   }

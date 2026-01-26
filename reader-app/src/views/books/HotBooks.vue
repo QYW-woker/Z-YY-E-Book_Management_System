@@ -92,9 +92,47 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// ============================================
+// Hot Books Page - iOS (Mobile) + Material Design (PC)
+// ============================================
+
 .hot-books-page {
   min-height: 100vh;
-  background-color: #f7f8fa;
+
+  // iOS style
+  @media (max-width: 767px) {
+    background-color: var(--ios-background);
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background-color: var(--md-background);
+    padding-left: 256px; // Sidebar width
+  }
+
+  // iOS NavBar style
+  :deep(.van-nav-bar) {
+    @media (max-width: 767px) {
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+
+      .van-nav-bar__title {
+        font-size: 17px;
+        font-weight: 600;
+      }
+    }
+
+    @media (min-width: 768px) {
+      background: var(--md-surface);
+      box-shadow: var(--md-elevation-1);
+
+      .van-nav-bar__title {
+        font-size: 20px;
+        font-weight: 500;
+      }
+    }
+  }
 }
 
 .page-loading {
@@ -103,43 +141,112 @@ onMounted(() => {
 }
 
 .book-list {
-  padding: 12px;
+  // iOS style
+  @media (max-width: 767px) {
+    padding: var(--ios-spacing-md);
+  }
+
+  // Material Design style - 2 column grid
+  @media (min-width: 768px) {
+    padding: var(--md-spacing-lg);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--md-spacing-md);
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .book-item {
   display: flex;
   align-items: center;
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+
+  // iOS style
+  @media (max-width: 767px) {
+    background: var(--ios-card-bg);
+    padding: var(--ios-spacing-md);
+    margin-bottom: var(--ios-spacing-sm);
+    border-radius: var(--ios-radius-md);
+    position: relative;
+
+    &:active {
+      background: var(--ios-gray-5);
+    }
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background: var(--md-surface);
+    padding: var(--md-spacing-md);
+    border-radius: var(--md-radius-lg);
+    box-shadow: var(--md-elevation-1);
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 0;
+
+    &:hover {
+      box-shadow: var(--md-elevation-hover);
+      transform: translateY(-2px);
+    }
+  }
 
   .rank {
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
     text-align: center;
-    font-size: 14px;
-    font-weight: bold;
-    color: #969799;
-    margin-right: 12px;
+    font-weight: 600;
     flex-shrink: 0;
 
+    // iOS style
+    @media (max-width: 767px) {
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      font-size: 15px;
+      color: var(--ios-gray);
+      margin-right: var(--ios-spacing-md);
+    }
+
+    // Material Design style
+    @media (min-width: 768px) {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 16px;
+      color: var(--md-on-surface-medium);
+      margin-right: var(--md-spacing-md);
+    }
+
     &.top {
-      background: linear-gradient(135deg, #ff6034 0%, #ee0a24 100%);
-      color: #fff;
-      border-radius: 50%;
+      @media (max-width: 767px) {
+        color: var(--ios-red);
+      }
+
+      @media (min-width: 768px) {
+        background: linear-gradient(135deg, #ff6034 0%, #ee0a24 100%);
+        color: #fff;
+        border-radius: 50%;
+      }
     }
   }
 
   .book-cover {
-    width: 60px;
-    height: 82px;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-right: 12px;
     flex-shrink: 0;
+    overflow: hidden;
+
+    @media (max-width: 767px) {
+      width: 60px;
+      height: 84px;
+      border-radius: var(--ios-radius-sm);
+      margin-right: var(--ios-spacing-md);
+    }
+
+    @media (min-width: 768px) {
+      width: 80px;
+      height: 112px;
+      border-radius: var(--md-radius-sm);
+      margin-right: var(--md-spacing-md);
+    }
   }
 
   .book-info {
@@ -147,51 +254,106 @@ onMounted(() => {
     min-width: 0;
 
     .book-title {
-      font-size: 15px;
-      font-weight: 500;
-      color: #323233;
       line-height: 1.4;
+
+      @media (max-width: 767px) {
+        font-size: 15px;
+        font-weight: 500;
+        color: #1C1C1E;
+      }
+
+      @media (min-width: 768px) {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--md-on-surface);
+      }
     }
 
     .book-author {
-      margin-top: 4px;
-      font-size: 12px;
-      color: #969799;
+      @media (max-width: 767px) {
+        margin-top: 2px;
+        font-size: 13px;
+        color: var(--ios-gray);
+      }
+
+      @media (min-width: 768px) {
+        margin-top: var(--md-spacing-xs);
+        font-size: 14px;
+        color: var(--md-on-surface-medium);
+      }
     }
 
     .book-stats {
-      margin-top: 6px;
-      font-size: 12px;
-      color: #c8c9cc;
+      display: flex;
+      gap: var(--ios-spacing-md);
+
+      @media (max-width: 767px) {
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--ios-gray-2);
+      }
+
+      @media (min-width: 768px) {
+        margin-top: var(--md-spacing-sm);
+        font-size: 13px;
+        color: var(--md-on-surface-disabled);
+        gap: var(--md-spacing-md);
+      }
 
       span {
-        margin-right: 16px;
-
-        .van-icon {
-          margin-right: 2px;
-        }
+        display: flex;
+        align-items: center;
+        gap: 4px;
       }
     }
 
     .book-meta {
-      margin-top: 6px;
       display: flex;
-      gap: 8px;
+      gap: var(--ios-spacing-sm);
+
+      @media (max-width: 767px) {
+        margin-top: var(--ios-spacing-sm);
+      }
+
+      @media (min-width: 768px) {
+        margin-top: var(--md-spacing-sm);
+        gap: var(--md-spacing-sm);
+      }
 
       .format {
-        font-size: 10px;
-        padding: 2px 6px;
-        background-color: #e8f4ff;
-        color: #1989fa;
+        padding: 2px 8px;
         border-radius: 4px;
+
+        @media (max-width: 767px) {
+          font-size: 11px;
+          background-color: rgba(0, 122, 255, 0.1);
+          color: var(--ios-blue);
+        }
+
+        @media (min-width: 768px) {
+          font-size: 12px;
+          background-color: rgba(25, 118, 210, 0.1);
+          color: var(--md-primary);
+          font-weight: 500;
+        }
       }
 
       .category {
-        font-size: 10px;
-        padding: 2px 6px;
-        background-color: #fff7e6;
-        color: #ff976a;
+        padding: 2px 8px;
         border-radius: 4px;
+
+        @media (max-width: 767px) {
+          font-size: 11px;
+          background-color: rgba(255, 149, 0, 0.1);
+          color: var(--ios-orange);
+        }
+
+        @media (min-width: 768px) {
+          font-size: 12px;
+          background-color: rgba(156, 39, 176, 0.1);
+          color: var(--md-secondary);
+          font-weight: 500;
+        }
       }
     }
   }
@@ -206,20 +368,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   font-size: 12px;
+  font-weight: 500;
   text-align: center;
-}
-
-.ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ellipsis-2 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 </style>

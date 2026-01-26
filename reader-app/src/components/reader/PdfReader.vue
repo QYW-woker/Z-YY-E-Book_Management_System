@@ -73,6 +73,10 @@ function onLoaded() {
 </script>
 
 <style lang="scss" scoped>
+// ============================================
+// PDF Reader - iOS (Mobile) + Material Design (PC)
+// ============================================
+
 .pdf-reader {
   position: relative;
   width: 100%;
@@ -96,8 +100,19 @@ function onLoaded() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.9);
   z-index: 100;
+
+  // iOS style
+  @media (max-width: 767px) {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 .toolbar {
@@ -109,32 +124,140 @@ function onLoaded() {
 
 .top-toolbar {
   top: 0;
+
+  // iOS NavBar style
+  :deep(.van-nav-bar) {
+    @media (max-width: 767px) {
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+
+      &::after {
+        background-color: var(--ios-separator);
+      }
+
+      .van-nav-bar__title {
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      .van-nav-bar__right .van-icon {
+        color: var(--ios-blue);
+      }
+    }
+
+    @media (min-width: 768px) {
+      background: var(--md-surface);
+      box-shadow: var(--md-elevation-1);
+
+      .van-nav-bar__title {
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      .van-nav-bar__right .van-icon {
+        color: var(--md-primary);
+        transition: color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:hover {
+          color: var(--md-primary-dark);
+        }
+      }
+    }
+  }
 }
 
 .tip-content {
-  padding: 16px;
-  font-size: 14px;
-  color: #666;
+  // iOS style
+  @media (max-width: 767px) {
+    padding: var(--ios-spacing-md);
+    font-size: 15px;
+    color: #1C1C1E;
 
-  p {
-    margin-bottom: 12px;
-    font-weight: bold;
+    p {
+      margin-bottom: var(--ios-spacing-md);
+      font-weight: 600;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        padding: var(--ios-spacing-sm) 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--ios-gray);
+
+        .van-icon {
+          color: var(--ios-blue);
+        }
+      }
+    }
   }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  // Material Design style
+  @media (min-width: 768px) {
+    padding: var(--md-spacing-lg);
+    font-size: 14px;
+    color: var(--md-on-surface);
 
-    li {
-      padding: 8px 0;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+    p {
+      margin-bottom: var(--md-spacing-md);
+      font-weight: 500;
+      font-size: 16px;
+    }
 
-      .van-icon {
-        color: #1989fa;
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        padding: var(--md-spacing-sm) 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--md-on-surface-medium);
+
+        .van-icon {
+          color: var(--md-primary);
+        }
       }
+    }
+  }
+}
+
+// Dialog styling
+:deep(.van-dialog) {
+  @media (max-width: 767px) {
+    border-radius: var(--ios-radius-lg);
+
+    .van-dialog__header {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .van-dialog__confirm {
+      color: var(--ios-blue);
+      font-weight: 600;
+    }
+  }
+
+  @media (min-width: 768px) {
+    border-radius: var(--md-radius-lg);
+    box-shadow: var(--md-elevation-4);
+
+    .van-dialog__header {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .van-dialog__confirm {
+      color: var(--md-primary);
+      font-weight: 500;
     }
   }
 }

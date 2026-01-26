@@ -1,8 +1,20 @@
 <template>
   <div class="home-page">
-    <!-- 顶部搜索栏 -->
-    <div class="header">
-      <div class="logo">电子书阅读</div>
+    <!-- 移动端顶部搜索栏 - iOS Large Title style -->
+    <div class="header mobile-only">
+      <div class="header-top">
+        <div class="logo">电子书阅读</div>
+        <div class="user-avatar" @click="goUser">
+          <van-image
+            v-if="authStore.user?.avatar"
+            :src="authStore.user.avatar"
+            round
+            width="32"
+            height="32"
+          />
+          <van-icon v-else name="user-o" size="24" />
+        </div>
+      </div>
       <van-search
         v-model="searchValue"
         placeholder="搜索书籍"
@@ -10,29 +22,48 @@
         readonly
         @click="goSearch"
       />
-      <div class="user-avatar" @click="goUser">
-        <van-image
-          v-if="authStore.user?.avatar"
-          :src="authStore.user.avatar"
-          round
-          width="32"
-          height="32"
+    </div>
+
+    <!-- PC端顶部搜索栏 - Material Design App Bar -->
+    <div class="pc-header pc-only">
+      <div class="search-container">
+        <van-search
+          v-model="searchValue"
+          placeholder="搜索书籍、作者..."
+          shape="round"
+          readonly
+          @click="goSearch"
         />
-        <van-icon v-else name="user-o" size="24" />
+      </div>
+      <div class="header-actions">
+        <div class="user-profile" @click="goUser">
+          <van-image
+            v-if="authStore.user?.avatar"
+            :src="authStore.user.avatar"
+            round
+            width="40"
+            height="40"
+          />
+          <van-icon v-else name="user-circle-o" size="40" color="#9e9e9e" />
+        </div>
       </div>
     </div>
 
     <!-- 轮播图 -->
-    <van-swipe class="banner" :autoplay="3000" indicator-color="#1989fa">
+    <van-swipe class="banner" :autoplay="4000" indicator-color="var(--ios-blue)">
       <van-swipe-item v-for="book in recommendedBooks" :key="book.book_id" @click="goBookDetail(book.book_id)">
         <div class="banner-item">
           <van-image
             :src="getBookCover(book)"
             fit="cover"
             width="100%"
-            height="180"
+            height="100%"
           />
-          <div class="banner-title">{{ book.title }}</div>
+          <div class="banner-overlay"></div>
+          <div class="banner-content">
+            <div class="banner-title">{{ book.title }}</div>
+            <div class="banner-author">{{ book.author || '未知作者' }}</div>
+          </div>
         </div>
       </van-swipe-item>
       <van-swipe-item v-if="recommendedBooks.length === 0">
@@ -46,7 +77,7 @@
         <span class="title">分类</span>
         <span class="more" @click="router.push('/category')">查看全部</span>
       </div>
-      <van-grid :column-num="4" :border="false">
+      <van-grid class="category-grid" :column-num="4" :border="false">
         <van-grid-item
           v-for="category in topCategories"
           :key="category.id"
@@ -200,114 +231,217 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// ============================================
+// Home Page - iOS (Mobile) + Material Design (PC)
+// ============================================
+
 .home-page {
-  background-color: #f5f7fa;
   min-height: 100vh;
 
-  // PC端内边距
+  // iOS style background
+  @media (max-width: 767px) {
+    background-color: var(--ios-background);
+  }
+
+  // Material Design background
   @media (min-width: 768px) {
-    padding: 24px 32px;
+    background-color: var(--md-background);
+    padding: var(--md-spacing-lg) var(--md-spacing-xl);
   }
 }
 
+// ============================================
+// Mobile Header - iOS Large Title Style
+// ============================================
 .header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #1989fa 0%, #2b7cdd 100%);
+  padding: var(--ios-spacing-md);
+  background: var(--ios-card-bg);
 
-  // PC端隐藏移动端header
-  @media (min-width: 768px) {
-    display: none;
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--ios-spacing-sm);
   }
 
   .logo {
-    color: #fff;
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 12px;
-    white-space: nowrap;
-  }
-
-  .van-search {
-    flex: 1;
-    padding: 0;
-
-    :deep(.van-search__content) {
-      background-color: rgba(255, 255, 255, 0.9);
-    }
+    font-size: 28px;
+    font-weight: 700;
+    color: #1C1C1E;
+    letter-spacing: -0.026em;
   }
 
   .user-avatar {
-    margin-left: 12px;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--ios-gray);
     cursor: pointer;
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  :deep(.van-search) {
+    padding: 0;
+
+    .van-search__content {
+      background: rgba(118, 118, 128, 0.12);
+      border-radius: 10px;
+    }
+
+    .van-field__control {
+      font-size: 17px;
+    }
   }
 }
 
-.banner {
-  height: 180px;
+// ============================================
+// PC Header - Material Design App Bar Style
+// ============================================
+.pc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--md-spacing-lg);
+  padding: var(--md-spacing-md) 0;
 
-  // PC端更高的轮播图
-  @media (min-width: 768px) {
-    height: 280px;
-    border-radius: 12px;
+  .search-container {
+    flex: 1;
+    max-width: 600px;
+
+    :deep(.van-search) {
+      padding: 0;
+
+      .van-search__content {
+        background: var(--md-surface);
+        box-shadow: var(--md-elevation-1);
+        border-radius: 28px;
+        transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:hover {
+          box-shadow: var(--md-elevation-2);
+        }
+      }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--md-spacing-md);
+  }
+
+  .user-profile {
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      box-shadow: var(--md-elevation-2);
+    }
+  }
+}
+
+// ============================================
+// Banner - iOS Carousel Style
+// ============================================
+.banner {
+  // iOS style
+  @media (max-width: 767px) {
+    height: 200px;
+    margin: var(--ios-spacing-md);
+    border-radius: var(--ios-radius-lg);
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    height: 320px;
+    border-radius: var(--md-radius-xl);
+    overflow: hidden;
+    box-shadow: var(--md-elevation-2);
   }
 
   .banner-item {
     position: relative;
-    height: 180px;
+    height: 100%;
 
-    @media (min-width: 768px) {
-      height: 280px;
+    :deep(.van-image) {
+      height: 100%;
     }
   }
 
-  .banner-title {
+  .banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 60%);
+  }
+
+  .banner-content {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 8px 12px;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-    color: #fff;
-    font-size: 16px;
+    padding: var(--ios-spacing-md);
 
     @media (min-width: 768px) {
-      padding: 16px 24px;
-      font-size: 20px;
+      padding: var(--md-spacing-lg);
+    }
+  }
+
+  .banner-title {
+    color: #fff;
+    font-weight: 600;
+
+    @media (max-width: 767px) {
+      font-size: 18px;
+      letter-spacing: -0.022em;
+    }
+
+    @media (min-width: 768px) {
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+  }
+
+  .banner-author {
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 4px;
+
+    @media (max-width: 767px) {
+      font-size: 14px;
+    }
+
+    @media (min-width: 768px) {
+      font-size: 16px;
     }
   }
 
   .banner-empty {
-    height: 180px;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f5f5f5;
-    color: #999;
-
-    @media (min-width: 768px) {
-      height: 280px;
-    }
+    background-color: var(--ios-gray-5);
+    color: var(--ios-gray);
   }
 }
 
+// ============================================
+// Section Headers
+// ============================================
 .section {
-  margin-top: 16px;
-  padding: 0 12px;
+  margin-top: var(--ios-spacing-lg);
+  padding: 0 var(--ios-spacing-md);
 
   @media (min-width: 768px) {
-    margin-top: 32px;
+    margin-top: var(--md-spacing-xl);
     padding: 0;
   }
 
@@ -315,30 +449,50 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: var(--ios-spacing-md);
 
     @media (min-width: 768px) {
-      margin-bottom: 20px;
+      margin-bottom: var(--md-spacing-lg);
     }
 
     .title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #323233;
-
-      @media (min-width: 768px) {
+      // iOS style
+      @media (max-width: 767px) {
         font-size: 20px;
+        font-weight: 700;
+        color: #1C1C1E;
+        letter-spacing: -0.026em;
+      }
+
+      // Material Design style
+      @media (min-width: 768px) {
+        font-size: var(--md-headline-6);
+        font-weight: 500;
+        color: var(--md-on-surface);
+        letter-spacing: 0.0125em;
       }
     }
 
     .more {
-      font-size: 12px;
-      color: #969799;
       cursor: pointer;
 
+      // iOS style
+      @media (max-width: 767px) {
+        font-size: 15px;
+        color: var(--ios-blue);
+
+        &:active {
+          opacity: 0.5;
+        }
+      }
+
+      // Material Design style
       @media (min-width: 768px) {
         font-size: 14px;
-        color: #1989fa;
+        font-weight: 500;
+        color: var(--md-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.0892857em;
 
         &:hover {
           text-decoration: underline;
@@ -348,135 +502,218 @@ onMounted(() => {
   }
 }
 
-// PC端分类用Grid布局
-:deep(.van-grid) {
+// ============================================
+// Category Grid
+// ============================================
+.category-grid {
+  // iOS style
+  @media (max-width: 767px) {
+    background: var(--ios-card-bg);
+    border-radius: var(--ios-radius-md);
+    overflow: hidden;
+
+    :deep(.van-grid-item__content) {
+      padding: var(--ios-spacing-md) var(--ios-spacing-sm);
+
+      &:active {
+        background: var(--ios-gray-5);
+      }
+    }
+
+    :deep(.van-grid-item__icon) {
+      color: var(--ios-blue);
+    }
+  }
+
+  // Material Design style
   @media (min-width: 768px) {
-    background: #fff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    background: var(--md-surface);
+    border-radius: var(--md-radius-lg);
+    padding: var(--md-spacing-md);
+    box-shadow: var(--md-elevation-1);
+
+    :deep(.van-grid-item) {
+      .van-grid-item__content {
+        padding: var(--md-spacing-md);
+        border-radius: var(--md-radius-md);
+        transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:hover {
+          background: rgba(25, 118, 210, 0.08);
+        }
+      }
+
+      .van-grid-item__icon {
+        color: var(--md-primary);
+      }
+
+      .van-grid-item__text {
+        font-weight: 500;
+      }
+    }
   }
 }
 
+// ============================================
+// Book Scroll - Horizontal on Mobile, Grid on PC
+// ============================================
 .book-scroll {
   display: flex;
   overflow-x: auto;
-  gap: 12px;
-  padding-bottom: 8px;
+  gap: var(--ios-spacing-md);
+  padding-bottom: var(--ios-spacing-sm);
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
     display: none;
   }
 
-  // PC端改为Grid布局
+  // Material Design Grid on PC
   @media (min-width: 768px) {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 24px;
+    gap: var(--md-spacing-lg);
     overflow-x: visible;
     padding-bottom: 0;
-  }
-
-  @media (min-width: 1200px) {
-    grid-template-columns: repeat(5, 1fr);
+    scroll-snap-type: none;
   }
 
   .book-card {
     flex-shrink: 0;
-    width: 100px;
+    width: 110px;
+    scroll-snap-align: start;
     cursor: pointer;
 
+    // iOS touch feedback
+    @media (max-width: 767px) {
+      &:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+      }
+    }
+
+    // Material Design Card on PC
     @media (min-width: 768px) {
       width: auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s;
+      background: var(--md-surface);
+      border-radius: var(--md-radius-lg);
+      padding: var(--md-spacing-md);
+      box-shadow: var(--md-elevation-1);
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        box-shadow: var(--md-elevation-hover);
       }
     }
 
     .book-cover {
-      width: 100px;
-      height: 138px;
-      border-radius: 4px;
+      border-radius: var(--ios-radius-sm);
       overflow: hidden;
+
+      @media (max-width: 767px) {
+        width: 110px;
+        height: 154px;
+      }
 
       @media (min-width: 768px) {
         width: 100%;
-        height: 200px;
-        border-radius: 8px;
+        height: 220px;
+        border-radius: var(--md-radius-md);
       }
     }
 
     .book-title {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #323233;
       line-height: 1.4;
 
-      @media (min-width: 768px) {
-        margin-top: 12px;
-        font-size: 15px;
+      @media (max-width: 767px) {
+        margin-top: var(--ios-spacing-sm);
+        font-size: 14px;
         font-weight: 500;
+        color: #1C1C1E;
+      }
+
+      @media (min-width: 768px) {
+        margin-top: var(--md-spacing-md);
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--md-on-surface);
       }
     }
 
     .book-author {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #969799;
+      @media (max-width: 767px) {
+        margin-top: 2px;
+        font-size: 12px;
+        color: var(--ios-gray);
+      }
 
       @media (min-width: 768px) {
-        margin-top: 6px;
-        font-size: 13px;
+        margin-top: var(--md-spacing-xs);
+        font-size: 14px;
+        color: var(--md-on-surface-medium);
       }
     }
   }
 }
 
+// ============================================
+// Hot List
+// ============================================
 .hot-list {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 8px;
+  overflow: hidden;
 
+  // iOS style
+  @media (max-width: 767px) {
+    background: var(--ios-card-bg);
+    border-radius: var(--ios-radius-md);
+  }
+
+  // Material Design style
   @media (min-width: 768px) {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  }
-
-  @media (min-width: 1200px) {
-    grid-template-columns: repeat(2, 1fr);
+    gap: var(--md-spacing-md);
+    background: transparent;
   }
 
   .hot-item {
     display: flex;
     align-items: center;
-    padding: 8px;
-    border-bottom: 1px solid #f5f5f5;
     cursor: pointer;
 
-    &:last-child {
-      border-bottom: none;
+    // iOS style
+    @media (max-width: 767px) {
+      padding: var(--ios-spacing-md);
+      position: relative;
+
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 64px;
+        right: 0;
+        height: 0.5px;
+        background: var(--ios-separator);
+      }
+
+      &:active {
+        background: var(--ios-gray-5);
+      }
     }
 
+    // Material Design style
     @media (min-width: 768px) {
-      padding: 16px;
-      border: 1px solid #f0f0f0;
-      border-radius: 12px;
-      transition: all 0.3s;
+      background: var(--md-surface);
+      padding: var(--md-spacing-md);
+      border-radius: var(--md-radius-lg);
+      box-shadow: var(--md-elevation-1);
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        border-color: #1989fa;
-        box-shadow: 0 4px 12px rgba(25, 137, 250, 0.15);
+        box-shadow: var(--md-elevation-hover);
+        transform: translateY(-2px);
       }
     }
 
@@ -485,21 +722,27 @@ onMounted(() => {
       height: 24px;
       line-height: 24px;
       text-align: center;
-      font-size: 14px;
-      font-weight: bold;
-      color: #969799;
-      margin-right: 12px;
+      font-weight: 600;
+      margin-right: var(--ios-spacing-md);
+
+      @media (max-width: 767px) {
+        font-size: 15px;
+        color: var(--ios-gray);
+      }
 
       @media (min-width: 768px) {
         width: 32px;
         height: 32px;
         line-height: 32px;
         font-size: 16px;
-        margin-right: 16px;
+        color: var(--md-on-surface-medium);
+        margin-right: var(--md-spacing-md);
       }
 
       &.top {
-        color: #ee0a24;
+        @media (max-width: 767px) {
+          color: var(--ios-red);
+        }
 
         @media (min-width: 768px) {
           background: linear-gradient(135deg, #ff6034 0%, #ee0a24 100%);
@@ -510,17 +753,20 @@ onMounted(() => {
     }
 
     .book-cover-small {
-      width: 50px;
-      height: 68px;
-      border-radius: 4px;
+      border-radius: var(--ios-radius-sm);
       overflow: hidden;
-      margin-right: 12px;
+      margin-right: var(--ios-spacing-md);
+
+      @media (max-width: 767px) {
+        width: 50px;
+        height: 70px;
+      }
 
       @media (min-width: 768px) {
         width: 70px;
-        height: 96px;
-        border-radius: 6px;
-        margin-right: 16px;
+        height: 98px;
+        border-radius: var(--md-radius-sm);
+        margin-right: var(--md-spacing-md);
       }
     }
 
@@ -529,48 +775,57 @@ onMounted(() => {
       min-width: 0;
 
       .book-title {
-        font-size: 14px;
-        color: #323233;
         font-weight: 500;
+
+        @media (max-width: 767px) {
+          font-size: 15px;
+          color: #1C1C1E;
+        }
 
         @media (min-width: 768px) {
           font-size: 16px;
+          color: var(--md-on-surface);
         }
       }
 
       .book-author {
-        margin-top: 4px;
-        font-size: 12px;
-        color: #969799;
+        @media (max-width: 767px) {
+          margin-top: 2px;
+          font-size: 13px;
+          color: var(--ios-gray);
+        }
 
         @media (min-width: 768px) {
-          margin-top: 6px;
+          margin-top: var(--md-spacing-xs);
           font-size: 14px;
+          color: var(--md-on-surface-medium);
         }
       }
 
       .book-stats {
-        margin-top: 4px;
-        font-size: 11px;
-        color: #c8c9cc;
+        display: flex;
+        gap: var(--ios-spacing-md);
 
-        @media (min-width: 768px) {
-          margin-top: 8px;
-          font-size: 13px;
+        @media (max-width: 767px) {
+          margin-top: 4px;
+          font-size: 12px;
+          color: var(--ios-gray-2);
         }
 
-        span {
-          margin-right: 12px;
-
-          @media (min-width: 768px) {
-            margin-right: 20px;
-          }
+        @media (min-width: 768px) {
+          margin-top: var(--md-spacing-sm);
+          font-size: 13px;
+          color: var(--md-on-surface-disabled);
+          gap: var(--md-spacing-md);
         }
       }
     }
   }
 }
 
+// ============================================
+// Default Cover
+// ============================================
 .default-cover {
   display: flex;
   align-items: center;
@@ -579,20 +834,30 @@ onMounted(() => {
   height: 100%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
-  font-size: 12px;
   text-align: center;
-  padding: 8px;
+  padding: var(--ios-spacing-sm);
+
+  @media (max-width: 767px) {
+    font-size: 13px;
+    font-weight: 500;
+  }
 
   @media (min-width: 768px) {
     font-size: 16px;
+    font-weight: 500;
   }
 }
 
+// ============================================
+// Bottom Space
+// ============================================
 .bottom-space {
-  height: 20px;
+  @media (max-width: 767px) {
+    height: var(--ios-spacing-lg);
+  }
 
   @media (min-width: 768px) {
-    height: 40px;
+    height: var(--md-spacing-xxl);
   }
 }
 </style>

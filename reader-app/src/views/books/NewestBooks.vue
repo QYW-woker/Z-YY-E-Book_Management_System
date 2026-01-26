@@ -93,9 +93,47 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// ============================================
+// Newest Books Page - iOS (Mobile) + Material Design (PC)
+// ============================================
+
 .newest-books-page {
   min-height: 100vh;
-  background-color: #f7f8fa;
+
+  // iOS style
+  @media (max-width: 767px) {
+    background-color: var(--ios-background);
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background-color: var(--md-background);
+    padding-left: 256px; // Sidebar width
+  }
+
+  // iOS NavBar style
+  :deep(.van-nav-bar) {
+    @media (max-width: 767px) {
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+
+      .van-nav-bar__title {
+        font-size: 17px;
+        font-weight: 600;
+      }
+    }
+
+    @media (min-width: 768px) {
+      background: var(--md-surface);
+      box-shadow: var(--md-elevation-1);
+
+      .van-nav-bar__title {
+        font-size: 20px;
+        font-weight: 500;
+      }
+    }
+  }
 }
 
 .page-loading {
@@ -104,57 +142,151 @@ onMounted(() => {
 }
 
 .book-list {
-  padding: 12px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: var(--ios-spacing-md);
+
+  // iOS style - 2 columns
+  @media (max-width: 767px) {
+    padding: var(--ios-spacing-md);
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // Material Design style - 4+ columns
+  @media (min-width: 768px) {
+    padding: var(--md-spacing-lg);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--md-spacing-lg);
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 .book-item {
-  background-color: #fff;
-  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+
+  // iOS style
+  @media (max-width: 767px) {
+    background: var(--ios-card-bg);
+    border-radius: var(--ios-radius-md);
+
+    &:active {
+      opacity: 0.7;
+      transform: scale(0.98);
+    }
+  }
+
+  // Material Design style
+  @media (min-width: 768px) {
+    background: var(--md-surface);
+    border-radius: var(--md-radius-lg);
+    box-shadow: var(--md-elevation-1);
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--md-elevation-hover);
+    }
+  }
 
   .book-cover {
     width: 100%;
-    height: 180px;
+
+    @media (max-width: 767px) {
+      height: 200px;
+    }
+
+    @media (min-width: 768px) {
+      height: 240px;
+    }
   }
 
   .book-info {
-    padding: 10px;
+    // iOS style
+    @media (max-width: 767px) {
+      padding: var(--ios-spacing-md);
+    }
+
+    // Material Design style
+    @media (min-width: 768px) {
+      padding: var(--md-spacing-md);
+    }
 
     .book-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: #323233;
       line-height: 1.4;
-      height: 40px;
+
+      @media (max-width: 767px) {
+        font-size: 15px;
+        font-weight: 500;
+        color: #1C1C1E;
+        height: 42px;
+      }
+
+      @media (min-width: 768px) {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--md-on-surface);
+        height: 45px;
+      }
     }
 
     .book-author {
-      margin-top: 6px;
-      font-size: 12px;
-      color: #969799;
+      @media (max-width: 767px) {
+        margin-top: var(--ios-spacing-xs);
+        font-size: 13px;
+        color: var(--ios-gray);
+      }
+
+      @media (min-width: 768px) {
+        margin-top: var(--md-spacing-xs);
+        font-size: 14px;
+        color: var(--md-on-surface-medium);
+      }
     }
 
     .book-meta {
-      margin-top: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
 
+      @media (max-width: 767px) {
+        margin-top: var(--ios-spacing-sm);
+      }
+
+      @media (min-width: 768px) {
+        margin-top: var(--md-spacing-sm);
+      }
+
       .format {
-        font-size: 10px;
-        padding: 2px 6px;
-        background-color: #e8f4ff;
-        color: #1989fa;
+        padding: 2px 8px;
         border-radius: 4px;
+
+        @media (max-width: 767px) {
+          font-size: 11px;
+          background-color: rgba(0, 122, 255, 0.1);
+          color: var(--ios-blue);
+        }
+
+        @media (min-width: 768px) {
+          font-size: 12px;
+          background-color: rgba(25, 118, 210, 0.1);
+          color: var(--md-primary);
+          font-weight: 500;
+        }
       }
 
       .date {
-        font-size: 11px;
-        color: #c8c9cc;
+        @media (max-width: 767px) {
+          font-size: 12px;
+          color: var(--ios-gray-2);
+        }
+
+        @media (min-width: 768px) {
+          font-size: 12px;
+          color: var(--md-on-surface-disabled);
+        }
       }
     }
   }
@@ -169,21 +301,8 @@ onMounted(() => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   font-size: 14px;
+  font-weight: 500;
   text-align: center;
   padding: 12px;
-}
-
-.ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ellipsis-2 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 </style>

@@ -155,9 +155,20 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// ============================================
+// Reader Page - iOS (Mobile) + Material Design (PC)
+// ============================================
+
 .reader-page {
   height: 100vh;
-  background-color: #f5f5f5;
+
+  @media (max-width: 767px) {
+    background-color: var(--ios-background);
+  }
+
+  @media (min-width: 768px) {
+    background-color: var(--md-background);
+  }
 }
 
 .loading-page {
@@ -165,14 +176,52 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #fff;
+
+  @media (max-width: 767px) {
+    background-color: var(--ios-card-bg);
+  }
+
+  @media (min-width: 768px) {
+    background-color: var(--md-surface);
+  }
 }
 
 .format-notice-page {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f7f8fa;
+
+  @media (max-width: 767px) {
+    background-color: var(--ios-background);
+  }
+
+  @media (min-width: 768px) {
+    background-color: var(--md-background);
+  }
+
+  // iOS NavBar style
+  :deep(.van-nav-bar) {
+    @media (max-width: 767px) {
+      background: rgba(249, 249, 249, 0.94);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+
+      .van-nav-bar__title {
+        font-size: 17px;
+        font-weight: 600;
+      }
+    }
+
+    @media (min-width: 768px) {
+      background: var(--md-surface);
+      box-shadow: var(--md-elevation-1);
+
+      .van-nav-bar__title {
+        font-size: 20px;
+        font-weight: 500;
+      }
+    }
+  }
 }
 
 .format-notice {
@@ -180,37 +229,92 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+
+  @media (max-width: 767px) {
+    padding: var(--ios-spacing-lg);
+  }
+
+  @media (min-width: 768px) {
+    padding: var(--md-spacing-xl);
+  }
 
   .format-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #323233;
-    margin-bottom: 12px;
+    @media (max-width: 767px) {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1C1C1E;
+      margin-bottom: var(--ios-spacing-md);
+    }
+
+    @media (min-width: 768px) {
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      margin-bottom: var(--md-spacing-md);
+    }
   }
 
   .format-desc {
-    font-size: 14px;
-    color: #969799;
     margin: 4px 0;
+
+    @media (max-width: 767px) {
+      font-size: 15px;
+      color: var(--ios-gray);
+    }
+
+    @media (min-width: 768px) {
+      font-size: 16px;
+      color: var(--md-on-surface-medium);
+    }
   }
 
   .format-tips {
-    font-size: 12px;
-    color: #c8c9cc;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #ebedf0;
+    @media (max-width: 767px) {
+      font-size: 13px;
+      color: var(--ios-gray-2);
+      margin-top: var(--ios-spacing-md);
+      padding-top: var(--ios-spacing-md);
+      border-top: 0.5px solid var(--ios-separator);
+    }
+
+    @media (min-width: 768px) {
+      font-size: 14px;
+      color: var(--md-on-surface-disabled);
+      margin-top: var(--md-spacing-md);
+      padding-top: var(--md-spacing-md);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
   }
 
   :deep(.van-empty__description) {
-    margin-top: 16px;
-    padding: 0 20px;
+    @media (max-width: 767px) {
+      margin-top: var(--ios-spacing-md);
+      padding: 0 var(--ios-spacing-lg);
+    }
+
+    @media (min-width: 768px) {
+      margin-top: var(--md-spacing-md);
+      padding: 0 var(--md-spacing-xl);
+    }
   }
 
   :deep(.van-button) {
-    margin-top: 24px;
-    min-width: 160px;
+    @media (max-width: 767px) {
+      margin-top: var(--ios-spacing-lg);
+      min-width: 180px;
+      border-radius: var(--ios-radius-sm);
+    }
+
+    @media (min-width: 768px) {
+      margin-top: var(--md-spacing-lg);
+      min-width: 200px;
+      border-radius: var(--md-radius-sm);
+      box-shadow: var(--md-elevation-2);
+
+      &:hover {
+        box-shadow: var(--md-elevation-3);
+      }
+    }
   }
 }
 </style>
