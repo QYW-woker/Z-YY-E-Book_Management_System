@@ -162,3 +162,112 @@ export interface RankingItem {
   cover_path: string;
   count: number;
 }
+
+// ==================== 读者端类型定义 ====================
+
+// 读者用户
+export interface User {
+  user_id: string;
+  username: string;
+  email: string | null;
+  phone: string | null;
+  password: string;
+  nickname: string;
+  avatar: string;
+  status: 'active' | 'disabled';
+  created_at: string;
+  updated_at: string;
+  last_login_at: string | null;
+}
+
+// 用户JWT Payload
+export interface UserJwtPayload {
+  userId: string;
+  username: string;
+  type: 'user';
+}
+
+// 用户认证请求
+export interface UserAuthRequest extends Request {
+  user?: {
+    userId: string;
+    username: string;
+  };
+}
+
+// 用户浏览历史
+export interface UserViewHistory {
+  id: number;
+  user_id: string;
+  book_id: string;
+  view_time: string;
+  duration: number;
+}
+
+// 用户下载记录
+export interface UserDownload {
+  id: number;
+  user_id: string;
+  book_id: string;
+  download_time: string;
+  ip: string;
+  user_agent: string;
+}
+
+// 用户收藏
+export interface UserFavorite {
+  id: number;
+  user_id: string;
+  book_id: string;
+  created_at: string;
+}
+
+// 搜索日志
+export interface SearchLog {
+  id: number;
+  user_id: string | null;
+  keyword: string;
+  results_count: number;
+  created_at: string;
+}
+
+// 阅读进度
+export interface ReadingProgress {
+  id: number;
+  user_id: string;
+  book_id: string;
+  progress: number;
+  current_page: number;
+  total_pages: number;
+  last_read_at: string;
+}
+
+// 读者端搜索参数
+export interface ReaderSearchParams {
+  keyword?: string;
+  title?: string;
+  author?: string;
+  isbn?: string;
+  category_id?: string;
+  language?: string;
+  format?: string[];
+  publish_date_start?: string;
+  publish_date_end?: string;
+  sort_by?: 'relevance' | 'newest' | 'popular' | 'title';
+  page?: number;
+  page_size?: number;
+}
+
+// 注册请求
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  email?: string;
+  phone?: string;
+}
+
+// 登录请求
+export interface LoginRequest {
+  account: string; // 用户名/邮箱/手机
+  password: string;
+}

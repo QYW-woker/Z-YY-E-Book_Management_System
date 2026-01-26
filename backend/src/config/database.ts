@@ -244,6 +244,93 @@ function createTables(): void {
     )
   `);
 
+  // ==================== 读者端相关表 ====================
+
+  // 读者用户表
+  sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      user_id TEXT PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE,
+      phone TEXT UNIQUE,
+      password TEXT NOT NULL,
+      nickname TEXT DEFAULT '',
+      avatar TEXT DEFAULT '',
+      status TEXT DEFAULT 'active',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      last_login_at TEXT
+    )
+  `);
+
+  // 用户浏览历史表
+  sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS user_view_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      book_id TEXT NOT NULL,
+      view_time TEXT DEFAULT (datetime('now')),
+      duration INTEGER DEFAULT 0,
+      FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+      FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+    )
+  `);
+
+  // 用户下载记录表
+  sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS user_downloads (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      book_id TEXT NOT NULL,
+      download_time TEXT DEFAULT (datetime('now')),
+      ip TEXT DEFAULT '',
+      user_agent TEXT DEFAULT '',
+      FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+      FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+    )
+  `);
+
+  // 用户收藏表
+  sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS user_favorites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      book_id TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(user_id, book_id),
+      FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+      FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+    )
+  `);
+
+  // 搜索日志表（用于热门搜索）
+  sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS search_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT,
+      keyword TEXT NOT NULL,
+      results_count INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+    )
+  `);
+
+  // 阅读进度表
+  sqlDb.exec(`
+    CREATE TABLE IF NOT EXISTS reading_progress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      book_id TEXT NOT NULL,
+      progress REAL DEFAULT 0,
+      current_page INTEGER DEFAULT 0,
+      total_pages INTEGER DEFAULT 0,
+      last_read_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(user_id, book_id),
+      FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+      FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+    )
+  `);
+
   // 创建索引
   sqlDb.exec(`
     CREATE INDEX IF NOT EXISTS idx_books_status ON books(status);
@@ -255,6 +342,14 @@ function createTables(): void {
     CREATE INDEX IF NOT EXISTS idx_view_logs_created_at ON view_logs(created_at);
     CREATE INDEX IF NOT EXISTS idx_download_logs_book_id ON download_logs(book_id);
     CREATE INDEX IF NOT EXISTS idx_download_logs_created_at ON download_logs(created_at);
+    CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_user_view_history_user_id ON user_view_history(user_id);
+    CREATE INDEX IF NOT EXISTS idx_user_view_history_book_id ON user_view_history(book_id);
+    CREATE INDEX IF NOT EXISTS idx_user_downloads_user_id ON user_downloads(user_id);
+    CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id);
+    CREATE INDEX IF NOT EXISTS idx_search_logs_keyword ON search_logs(keyword);
+    CREATE INDEX IF NOT EXISTS idx_reading_progress_user_id ON reading_progress(user_id);
   `);
 
   saveDatabase();

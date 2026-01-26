@@ -6,9 +6,13 @@ import { bookController } from '../controllers/bookController.js';
 import { categoryController } from '../controllers/categoryController.js';
 import { tagController } from '../controllers/tagController.js';
 import { statisticsController } from '../controllers/statisticsController.js';
+import readerRoutes from './readerRoutes.js';
 import type { AuthRequest } from '../types/index.js';
 
 const router = Router();
+
+// ==================== 读者端API ====================
+router.use('/', readerRoutes);
 
 // ==================== 认证相关 ====================
 router.post('/admin/login', authController.login);
