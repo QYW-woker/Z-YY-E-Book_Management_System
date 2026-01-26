@@ -61,11 +61,7 @@
           <div class="banner-overlay"></div>
           <!-- 上层：内容区域 -->
           <div class="banner-content">
-            <div class="banner-info">
-              <div class="banner-title">{{ book.title }}</div>
-              <div class="banner-author">{{ book.author || '未知作者' }}</div>
-            </div>
-            <!-- 原始比例封面 -->
+            <!-- 原始比例封面（左侧） -->
             <div class="banner-cover">
               <van-image
                 :src="getBookCover(book)"
@@ -77,6 +73,11 @@
                   <div class="default-cover-banner">{{ book.title.slice(0, 2) }}</div>
                 </template>
               </van-image>
+            </div>
+            <!-- 书名和作者（右侧） -->
+            <div class="banner-info">
+              <div class="banner-title">{{ book.title }}</div>
+              <div class="banner-author">{{ book.author || '未知作者' }}</div>
             </div>
           </div>
         </div>
@@ -428,7 +429,7 @@ onMounted(() => {
     }
   }
 
-  // 文字信息区
+  // 文字信息区（右侧）
   .banner-info {
     flex: 1;
     min-width: 0;
@@ -437,11 +438,11 @@ onMounted(() => {
     justify-content: flex-end;
 
     @media (max-width: 767px) {
-      padding-right: var(--ios-spacing-md);
+      padding-left: var(--ios-spacing-md);
     }
 
     @media (min-width: 768px) {
-      padding-right: var(--md-spacing-xl);
+      padding-left: var(--md-spacing-xl);
     }
   }
 
