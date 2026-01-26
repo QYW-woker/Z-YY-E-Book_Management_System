@@ -201,8 +201,13 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .home-page {
-  background-color: #f7f8fa;
+  background-color: #f5f7fa;
   min-height: 100vh;
+
+  // PC端内边距
+  @media (min-width: 768px) {
+    padding: 24px 32px;
+  }
 }
 
 .header {
@@ -210,6 +215,11 @@ onMounted(() => {
   align-items: center;
   padding: 12px 16px;
   background: linear-gradient(135deg, #1989fa 0%, #2b7cdd 100%);
+
+  // PC端隐藏移动端header
+  @media (min-width: 768px) {
+    display: none;
+  }
 
   .logo {
     color: #fff;
@@ -238,15 +248,28 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     color: #fff;
+    cursor: pointer;
   }
 }
 
 .banner {
   height: 180px;
 
+  // PC端更高的轮播图
+  @media (min-width: 768px) {
+    height: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
   .banner-item {
     position: relative;
     height: 180px;
+
+    @media (min-width: 768px) {
+      height: 280px;
+    }
   }
 
   .banner-title {
@@ -258,6 +281,11 @@ onMounted(() => {
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
     color: #fff;
     font-size: 16px;
+
+    @media (min-width: 768px) {
+      padding: 16px 24px;
+      font-size: 20px;
+    }
   }
 
   .banner-empty {
@@ -267,6 +295,10 @@ onMounted(() => {
     justify-content: center;
     background-color: #f5f5f5;
     color: #999;
+
+    @media (min-width: 768px) {
+      height: 280px;
+    }
   }
 }
 
@@ -274,22 +306,55 @@ onMounted(() => {
   margin-top: 16px;
   padding: 0 12px;
 
+  @media (min-width: 768px) {
+    margin-top: 32px;
+    padding: 0;
+  }
+
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
 
+    @media (min-width: 768px) {
+      margin-bottom: 20px;
+    }
+
     .title {
       font-size: 16px;
       font-weight: bold;
       color: #323233;
+
+      @media (min-width: 768px) {
+        font-size: 20px;
+      }
     }
 
     .more {
       font-size: 12px;
       color: #969799;
+      cursor: pointer;
+
+      @media (min-width: 768px) {
+        font-size: 14px;
+        color: #1989fa;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
+  }
+}
+
+// PC端分类用Grid布局
+:deep(.van-grid) {
+  @media (min-width: 768px) {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -303,15 +368,49 @@ onMounted(() => {
     display: none;
   }
 
+  // PC端改为Grid布局
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
   .book-card {
     flex-shrink: 0;
     width: 100px;
+    cursor: pointer;
+
+    @media (min-width: 768px) {
+      width: auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+    }
 
     .book-cover {
       width: 100px;
       height: 138px;
       border-radius: 4px;
       overflow: hidden;
+
+      @media (min-width: 768px) {
+        width: 100%;
+        height: 200px;
+        border-radius: 8px;
+      }
     }
 
     .book-title {
@@ -319,12 +418,23 @@ onMounted(() => {
       font-size: 13px;
       color: #323233;
       line-height: 1.4;
+
+      @media (min-width: 768px) {
+        margin-top: 12px;
+        font-size: 15px;
+        font-weight: 500;
+      }
     }
 
     .book-author {
       margin-top: 4px;
       font-size: 11px;
       color: #969799;
+
+      @media (min-width: 768px) {
+        margin-top: 6px;
+        font-size: 13px;
+      }
     }
   }
 }
@@ -334,14 +444,40 @@ onMounted(() => {
   border-radius: 8px;
   padding: 8px;
 
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .hot-item {
     display: flex;
     align-items: center;
     padding: 8px;
     border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
 
     &:last-child {
       border-bottom: none;
+    }
+
+    @media (min-width: 768px) {
+      padding: 16px;
+      border: 1px solid #f0f0f0;
+      border-radius: 12px;
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: #1989fa;
+        box-shadow: 0 4px 12px rgba(25, 137, 250, 0.15);
+      }
     }
 
     .rank {
@@ -354,8 +490,22 @@ onMounted(() => {
       color: #969799;
       margin-right: 12px;
 
+      @media (min-width: 768px) {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 16px;
+        margin-right: 16px;
+      }
+
       &.top {
         color: #ee0a24;
+
+        @media (min-width: 768px) {
+          background: linear-gradient(135deg, #ff6034 0%, #ee0a24 100%);
+          color: #fff;
+          border-radius: 50%;
+        }
       }
     }
 
@@ -365,6 +515,13 @@ onMounted(() => {
       border-radius: 4px;
       overflow: hidden;
       margin-right: 12px;
+
+      @media (min-width: 768px) {
+        width: 70px;
+        height: 96px;
+        border-radius: 6px;
+        margin-right: 16px;
+      }
     }
 
     .book-info {
@@ -375,12 +532,21 @@ onMounted(() => {
         font-size: 14px;
         color: #323233;
         font-weight: 500;
+
+        @media (min-width: 768px) {
+          font-size: 16px;
+        }
       }
 
       .book-author {
         margin-top: 4px;
         font-size: 12px;
         color: #969799;
+
+        @media (min-width: 768px) {
+          margin-top: 6px;
+          font-size: 14px;
+        }
       }
 
       .book-stats {
@@ -388,8 +554,17 @@ onMounted(() => {
         font-size: 11px;
         color: #c8c9cc;
 
+        @media (min-width: 768px) {
+          margin-top: 8px;
+          font-size: 13px;
+        }
+
         span {
           margin-right: 12px;
+
+          @media (min-width: 768px) {
+            margin-right: 20px;
+          }
         }
       }
     }
@@ -407,5 +582,17 @@ onMounted(() => {
   font-size: 12px;
   text-align: center;
   padding: 8px;
+
+  @media (min-width: 768px) {
+    font-size: 16px;
+  }
+}
+
+.bottom-space {
+  height: 20px;
+
+  @media (min-width: 768px) {
+    height: 40px;
+  }
 }
 </style>

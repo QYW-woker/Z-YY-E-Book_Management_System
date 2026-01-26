@@ -158,10 +158,6 @@ onMounted(() => {
 .reader-page {
   height: 100vh;
   background-color: #f5f5f5;
-
-  @media (min-width: 768px) {
-    height: calc(100vh - 40px);
-  }
 }
 
 .loading-page {
@@ -170,10 +166,6 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background-color: #fff;
-
-  @media (min-width: 768px) {
-    height: calc(100vh - 40px);
-  }
 }
 
 .format-notice-page {
@@ -181,10 +173,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background-color: #f7f8fa;
-
-  @media (min-width: 768px) {
-    height: calc(100vh - 40px);
-  }
 }
 
 .format-notice {
