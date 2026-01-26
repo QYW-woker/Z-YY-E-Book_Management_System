@@ -45,6 +45,18 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '注册' },
   },
   {
+    path: '/books/newest',
+    name: 'NewestBooks',
+    component: () => import('@/views/books/NewestBooks.vue'),
+    meta: { title: '最新上架' },
+  },
+  {
+    path: '/books/hot',
+    name: 'HotBooks',
+    component: () => import('@/views/books/HotBooks.vue'),
+    meta: { title: '热门下载' },
+  },
+  {
     path: '/books/:id',
     name: 'BookDetail',
     component: () => import('@/views/book/Detail.vue'),

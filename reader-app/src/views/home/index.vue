@@ -61,7 +61,7 @@
     <div class="section">
       <div class="section-header">
         <span class="title">最新上架</span>
-        <span class="more" @click="goSearch('', 'newest')">更多</span>
+        <span class="more" @click="router.push('/books/newest')">更多</span>
       </div>
       <div class="book-scroll">
         <div
@@ -89,7 +89,7 @@
     <div class="section">
       <div class="section-header">
         <span class="title">热门下载</span>
-        <span class="more" @click="goSearch('', 'popular')">更多</span>
+        <span class="more" @click="router.push('/books/hot')">更多</span>
       </div>
       <div class="hot-list">
         <div
@@ -181,8 +181,8 @@ async function loadData() {
   try {
     const [recommended, newest, hot, cats] = await Promise.all([
       booksApi.getRecommendedBooks(5),
-      booksApi.getNewestBooks(10),
-      booksApi.getHotBooks(10),
+      booksApi.getNewestBooks(5),  // 首页仅展示5本
+      booksApi.getHotBooks(10),    // 首页最多展示10本
       booksApi.getCategories(),
     ]);
     recommendedBooks.value = recommended;
