@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -113,12 +112,14 @@ const router = createRouter({
 });
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   document.title = `${to.meta.title || '电子书阅读'} - 电子书阅读`;
 
   // 检查是否需要登录
   if (to.meta.requiresAuth) {
+    // 动态导入以避免循环依赖
+    const { useAuthStore } = await import('@/stores/auth');
     const authStore = useAuthStore();
     if (!authStore.isLoggedIn) {
       next({ name: 'Login', query: { redirect: to.fullPath } });
