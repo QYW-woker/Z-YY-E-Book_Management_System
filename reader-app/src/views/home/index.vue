@@ -53,16 +53,31 @@
     <van-swipe class="banner" :autoplay="4000" indicator-color="var(--ios-blue)">
       <van-swipe-item v-for="book in recommendedBooks" :key="book.book_id" @click="goBookDetail(book.book_id)">
         <div class="banner-item">
-          <van-image
-            :src="getBookCover(book)"
-            fit="cover"
-            width="100%"
-            height="100%"
-          />
+          <!-- 底层：模糊背景 -->
+          <div
+            class="banner-bg"
+            :style="{ backgroundImage: `url(${getBookCover(book)})` }"
+          ></div>
           <div class="banner-overlay"></div>
+          <!-- 上层：内容区域 -->
           <div class="banner-content">
-            <div class="banner-title">{{ book.title }}</div>
-            <div class="banner-author">{{ book.author || '未知作者' }}</div>
+            <div class="banner-info">
+              <div class="banner-title">{{ book.title }}</div>
+              <div class="banner-author">{{ book.author || '未知作者' }}</div>
+            </div>
+            <!-- 原始比例封面 -->
+            <div class="banner-cover">
+              <van-image
+                :src="getBookCover(book)"
+                fit="contain"
+                width="100%"
+                height="100%"
+              >
+                <template #error>
+                  <div class="default-cover-banner">{{ book.title.slice(0, 2) }}</div>
+                </template>
+              </van-image>
+            </div>
           </div>
         </div>
       </van-swipe-item>
@@ -370,33 +385,70 @@ onMounted(() => {
   .banner-item {
     position: relative;
     height: 100%;
-
-    :deep(.van-image) {
-      height: 100%;
-    }
+    overflow: hidden;
   }
 
+  // 底层模糊背景
+  .banner-bg {
+    position: absolute;
+    inset: -20px; // 扩展边缘避免模糊边缘出现空白
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px);
+    transform: scale(1.1);
+  }
+
+  // 半透明遮罩层
   .banner-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 60%);
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
   }
 
+  // 内容层
   .banner-content {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: var(--ios-spacing-md);
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    @media (max-width: 767px) {
+      padding: var(--ios-spacing-md);
+      flex-direction: row;
+    }
 
     @media (min-width: 768px) {
-      padding: var(--md-spacing-lg);
+      padding: var(--md-spacing-lg) var(--md-spacing-xl);
+      flex-direction: row;
+    }
+  }
+
+  // 文字信息区
+  .banner-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    @media (max-width: 767px) {
+      padding-right: var(--ios-spacing-md);
+    }
+
+    @media (min-width: 768px) {
+      padding-right: var(--md-spacing-xl);
     }
   }
 
   .banner-title {
     color: #fff;
     font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 
     @media (max-width: 767px) {
       font-size: 18px;
@@ -404,15 +456,16 @@ onMounted(() => {
     }
 
     @media (min-width: 768px) {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 500;
       letter-spacing: 0;
     }
   }
 
   .banner-author {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
     margin-top: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 
     @media (max-width: 767px) {
       font-size: 14px;
@@ -420,7 +473,45 @@ onMounted(() => {
 
     @media (min-width: 768px) {
       font-size: 16px;
+      margin-top: 8px;
     }
+  }
+
+  // 原始比例封面
+  .banner-cover {
+    flex-shrink: 0;
+    border-radius: var(--ios-radius-sm);
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+    @media (max-width: 767px) {
+      width: 90px;
+      height: 126px; // 1:1.4 书籍比例
+    }
+
+    @media (min-width: 768px) {
+      width: 160px;
+      height: 224px;
+      border-radius: var(--md-radius-md);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    :deep(.van-image) {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .default-cover-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
   }
 
   .banner-empty {
