@@ -317,11 +317,8 @@ function getBookCover(book: Book): string {
 }
 
 // 跳转搜索
-function goSearch(keyword?: string, sortBy?: string) {
-  const query: any = {};
-  if (keyword) query.keyword = keyword;
-  if (sortBy) query.sort_by = sortBy;
-  router.push({ path: '/search', query });
+function goSearch() {
+  router.push('/search');
 }
 
 // 跳转用户中心
