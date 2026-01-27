@@ -429,20 +429,25 @@ onMounted(() => {
     .van-search__content {
       background: rgba(118, 118, 128, 0.12);
       border-radius: 10px;
+      height: 36px;
     }
 
     .van-cell {
-      padding: 10px 12px;
+      padding: 0 12px;
+      height: 36px;
+      line-height: 36px;
       display: flex;
       align-items: center;
     }
 
     .van-field__body {
+      height: 36px;
       display: flex;
       align-items: center;
     }
 
     .van-field__left-icon {
+      height: 36px;
       display: flex;
       align-items: center;
       margin-right: 6px;
@@ -453,14 +458,22 @@ onMounted(() => {
       }
     }
 
+    .van-field__value {
+      height: 36px;
+      display: flex;
+      align-items: center;
+    }
+
     .van-field__control {
       font-size: 16px;
-      height: 20px;
-      line-height: 20px;
+      height: 36px;
+      min-height: 36px;
+      line-height: 36px;
     }
 
     .van-field__control::placeholder {
       color: var(--ios-gray);
+      line-height: 36px;
     }
   }
 }
